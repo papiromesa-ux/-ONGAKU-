@@ -1,8 +1,12 @@
-// --- LÓGICA ONGAKU - FASE 2 ---
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { VRMLoaderPlugin, VRMUtils } from 'https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.0.0/lib/three-vrm.module.js';
+import { _db, _secAuth } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
 document.addEventListener('DOMContentLoaded', () => {
   
-  // --- 1. CONFIGURACIÓN GITHUB ---
   const GITHUB_USER = "papiromesa-ux";
   const GITHUB_REPO = "-ONGAKU-";
   const GITHUB_BRANCH = "main";
@@ -13,8 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let isPlaying = false;
   let isShuffle = false;
   let isRepeat = false;
+  let usuarioActual = null;
+  let misFavoritos = [];
 
-  // Elementos DOM
   const audio = document.getElementById('audio-player');
   const listaCanciones = document.getElementById('lista-canciones');
   const listaTendencias = document.getElementById('lista-tendencias');
@@ -40,67 +45,76 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnShuffle = document.getElementById('btn-shuffle');
   const btnRepeat = document.getElementById('btn-repeat');
   const btnHeartFull = document.getElementById('btn-heart-full');
+  const fullCover = document.getElementById('full-cover');
 
-  // --- 2. SALUDO DINÁMICO (Punto 11) ---
-  function actualizarSaludo() {
-    const hora = new Date().getHours();
-    const genero = localStorage.getItem('mizushi_genero') || 'hombre'; // Simulamos que Firebase nos dio esto
-    let saludo = "";
-    const esFemenino = genero.toLowerCase() === 'mujer' || genero.toLowerCase() === 'femenino';
+  // --- 1. FIREBASE & SSO ---
+  onAuthStateChanged(_secAuth, async (user) => {
+    if (user) {
+      usuarioActual = user;
+      const userEl = document.getElementById('user-display-name');
+      userEl.textContent = user.displayName || user.email.split('@')[0];
 
-    if (hora >= 1 && hora < 7) {
-      saludo = esFemenino ? "Hola, Madrugadora" : "Hola, Madrugador";
-    } else if (hora >= 7 && hora < 13) {
-      saludo = "Buenos días";
-    } else if (hora >= 13 && hora < 19) {
-      saludo = "Buen provecho";
-    } else if (hora >= 19 && hora < 22) {
-      saludo = "Buenas noches";
+      const docRef = doc(_db, "estudiantes", user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        misFavoritos = data.favoritos || [];
+        actualizarSaludo(data.genero);
+        actualizarCorazonUI();
+      }
     } else {
-      saludo = esFemenino ? "Hola, Noctámbura" : "Hola, Noctámbulo";
+      window.location.href = "https://papiromesa-ux.github.io/-MIZUSHIKODE-/pages/login.html";
     }
+  });
+
+  function actualizarSaludo(genero = 'hombre') {
+    const hora = new Date().getHours();
+    const esFemenino = genero.toLowerCase() === 'mujer' || genero.toLowerCase() === 'femenino';
+    let saludo = "";
+
+    if (hora >= 1 && hora < 7) saludo = esFemenino ? "Hola, Madrugadora" : "Hola, Madrugador";
+    else if (hora >= 7 && hora < 13) saludo = "Buenos días";
+    else if (hora >= 13 && hora < 19) saludo = "Buen provecho";
+    else if (hora >= 19 && hora < 22) saludo = "Buenas noches";
+    else saludo = esFemenino ? "Hola, Noctámbura" : "Hola, Noctámbulo";
     
     document.getElementById('dynamic-greeting').textContent = saludo;
   }
 
-  // --- 3. SONIDOS ASMR (Punto 13) ---
-  const sonidoClick = new Audio('assets/sonidos/click.mp3'); // Asegúrate de tener este archivo
+  // --- 2. SONIDOS ASMR ---
+  const sonidoClick = new Audio('assets/sonidos/click.mp3');
   document.querySelectorAll('.btn-sonido').forEach(btn => {
     btn.addEventListener('click', () => {
       sonidoClick.currentTime = 0;
-      sonidoClick.volume = 0.4;
-      sonidoClick.play().catch(e => console.log("Audio no encontrado"));
+      sonidoClick.volume = 0.3;
+      sonidoClick.play().catch(e => {});
     });
   });
 
-  // --- 4. CARGAR MÚSICA DESDE GITHUB (Punto 1: Traer todas) ---
+  // --- 3. CARGAR MÚSICA (Límite 100) ---
   async function cargarMusicaDesdeGitHub() {
     try {
-      // Agregamos ?per_page=100 para traer todas las canciones
       const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${CARPETA_MUSICA}?ref=${GITHUB_BRANCH}&per_page=100`;
       const res = await fetch(url);
       const archivos = await res.json();
 
-      canciones = archivos
-        .filter(a => a.name.endsWith('.mp3'))
-        .map(a => ({
-          titulo: a.name.replace('.mp3', '').replace(/_/g, ' '),
-          src: a.download_url
-        }));
+      canciones = archivos.filter(a => a.name.endsWith('.mp3')).map(a => ({
+        titulo: a.name.replace('.mp3', '').replace(/_/g, ' '),
+        src: a.download_url
+      }));
 
       renderizarListas();
       if(canciones.length > 0) cargarCancion(0);
     } catch (error) {
-      console.error("Error al conectar con GitHub:", error);
+      console.error("Error de GitHub:", error);
     }
   }
 
-  // --- 5. RENDERIZAR LISTAS ---
   function crearElementoLista(cancion, index) {
     const li = document.createElement('li');
     li.className = `song-item ${index === currentTrackIndex ? 'playing' : ''}`;
     li.innerHTML = `
-      <div class="song-cover">MP3</div>
+      <div class="song-cover"></div>
       <div class="song-info">
         <div class="song-title">${cancion.titulo}</div>
         <div class="song-artist">ONGAKU Lofi</div>
@@ -115,42 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderizarListas() {
-    listaCanciones.innerHTML = '';
-    listaTendencias.innerHTML = '';
-    listaFiltrada.innerHTML = '';
-    
+    listaCanciones.innerHTML = ''; listaTendencias.innerHTML = '';
     canciones.slice(0, 5).forEach((c, i) => listaTendencias.appendChild(crearElementoLista(c, i)));
     canciones.forEach((c, i) => listaCanciones.appendChild(crearElementoLista(c, i)));
   }
 
-  // --- 6. FILTROS DE GÉNERO (Punto 3) ---
-  document.getElementById('filtros-genero').addEventListener('click', (e) => {
-    if(!e.target.classList.contains('pill')) return;
-    
-    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-    e.target.classList.add('active');
-    
-    const filtro = e.target.getAttribute('data-filter');
-    listaFiltrada.innerHTML = '';
-
-    if(filtro === 'todo') {
-      listaFiltrada.innerHTML = '<p style="color:#aaa;">Todos los géneros seleccionados. Ve a Biblioteca para ver todo.</p>';
-      return;
-    }
-
-    const resultados = canciones.filter(c => c.titulo.toLowerCase().includes(filtro));
-    
-    if(resultados.length === 0) {
-      listaFiltrada.innerHTML = '<p style="color:#aaa;">No hay canciones en este género.</p>';
-    } else {
-      resultados.forEach(c => {
-        const idxReal = canciones.findIndex(orig => orig.titulo === c.titulo);
-        listaFiltrada.appendChild(crearElementoLista(c, idxReal));
-      });
-    }
-  });
-
-  // --- 7. LÓGICA DEL REPRODUCTOR (Puntos 6, 8, 9) ---
+  // --- 4. REPRODUCTOR ---
   function cargarCancion(index) {
     if(canciones.length === 0) return;
     currentTrackIndex = index;
@@ -160,12 +144,12 @@ document.addEventListener('DOMContentLoaded', () => {
     miniTitle.textContent = cancion.titulo;
     fullTitle.textContent = cancion.titulo;
 
-    // Actualizar UI listas
-    document.querySelectorAll('.song-item').forEach((el, i) => {
+    document.querySelectorAll('.song-item').forEach((el) => {
       el.classList.toggle('playing', el.querySelector('.song-title').textContent === cancion.titulo);
     });
 
     actualizarMediaSession(cancion);
+    actualizarCorazonUI();
   }
 
   function reproducir() {
@@ -189,45 +173,46 @@ document.addEventListener('DOMContentLoaded', () => {
     iconPlayMain.innerHTML = icon;
   }
 
-  function siguienteCancion() {
-    if(isShuffle) {
-      currentTrackIndex = Math.floor(Math.random() * canciones.length);
+  // --- 5. FAVORITOS ---
+  function actualizarCorazonUI() {
+    if(canciones.length === 0) return;
+    const cancionActual = canciones[currentTrackIndex].titulo;
+    if(misFavoritos.includes(cancionActual)) btnHeartFull.classList.add('active');
+    else btnHeartFull.classList.remove('active');
+  }
+
+  btnHeartFull.addEventListener('click', async () => {
+    if(!usuarioActual || canciones.length === 0) return;
+    const cancionActual = canciones[currentTrackIndex].titulo;
+    const docRef = doc(_db, "estudiantes", usuarioActual.uid);
+
+    if (misFavoritos.includes(cancionActual)) {
+      await updateDoc(docRef, { favoritos: arrayRemove(cancionActual) });
+      misFavoritos = misFavoritos.filter(c => c !== cancionActual);
     } else {
-      currentTrackIndex = (currentTrackIndex + 1) % canciones.length;
+      await updateDoc(docRef, { favoritos: arrayUnion(cancionActual) });
+      misFavoritos.push(cancionActual);
     }
-    cargarCancion(currentTrackIndex);
-    if(isPlaying) reproducir();
-  }
+    actualizarCorazonUI();
+  });
 
-  function anteriorCancion() {
-    currentTrackIndex = (currentTrackIndex - 1 + canciones.length) % canciones.length;
-    cargarCancion(currentTrackIndex);
-    if(isPlaying) reproducir();
-  }
-
-  // --- 8. EVENTOS ---
+  // --- 6. BOTONES ---
   btnMiniPlay.addEventListener('click', togglePlay);
   btnPlayMain.addEventListener('click', togglePlay);
-  btnNext.addEventListener('click', siguienteCancion);
-  btnPrev.addEventListener('click', anteriorCancion);
+  btnNext.addEventListener('click', () => { currentTrackIndex = (currentTrackIndex + 1) % canciones.length; cargarCancion(currentTrackIndex); if(isPlaying) reproducir(); });
+  btnPrev.addEventListener('click', () => { currentTrackIndex = (currentTrackIndex - 1 + canciones.length) % canciones.length; cargarCancion(currentTrackIndex); if(isPlaying) reproducir(); });
   
   btnShuffle.addEventListener('click', () => { isShuffle = !isShuffle; btnShuffle.style.color = isShuffle ? 'var(--aguamarina)' : 'var(--texto-dim)'; });
   btnRepeat.addEventListener('click', () => { isRepeat = !isRepeat; btnRepeat.style.color = isRepeat ? 'var(--aguamarina)' : 'var(--texto-dim)'; });
-  
-  btnHeartFull.addEventListener('click', () => {
-    btnHeartFull.classList.toggle('active');
-    // Aquí iría la lógica de Firebase (Punto 9)
-  });
 
   document.getElementById('mini-player').addEventListener('click', (e) => {
     if(!e.target.closest('button')) fullPlayer.classList.add('active');
   });
-  
   btnCloseFull.addEventListener('click', () => fullPlayer.classList.remove('active'));
 
   audio.addEventListener('ended', () => {
     if(isRepeat) { audio.currentTime = 0; reproducir(); } 
-    else { siguienteCancion(); }
+    else { currentTrackIndex = (currentTrackIndex + 1) % canciones.length; cargarCancion(currentTrackIndex); reproducir(); }
   });
 
   audio.addEventListener('timeupdate', () => {
@@ -235,44 +220,91 @@ document.addEventListener('DOMContentLoaded', () => {
     progressFill.style.width = `${pct || 0}%`;
     timeCurrent.textContent = formatearTiempo(audio.currentTime);
   });
-
   audio.addEventListener('loadedmetadata', () => timeTotal.textContent = formatearTiempo(audio.duration));
 
   function formatearTiempo(sec) {
     if (isNaN(sec)) return "0:00";
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
+    const m = Math.floor(sec / 60); const s = Math.floor(sec % 60);
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 
-  // --- 9. BÚSQUEDA ---
+  // --- 7. BÚSQUEDA Y FILTROS ---
   buscador.addEventListener('input', (e) => {
     const text = e.target.value.toLowerCase();
     listaBusqueda.innerHTML = '';
     if(text === '') return;
     canciones.filter(c => c.titulo.toLowerCase().includes(text)).forEach(c => {
-      const idxReal = canciones.findIndex(orig => orig.titulo === c.titulo);
-      listaBusqueda.appendChild(crearElementoLista(c, idxReal));
+      listaBusqueda.appendChild(crearElementoLista(c, canciones.findIndex(orig => orig.titulo === c.titulo)));
     });
   });
 
-  // --- 10. MEDIA SESSION ---
-  function actualizarMediaSession(cancion) {
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: cancion.titulo,
-        artist: "ONGAKU Lofi",
-        album: 'MizushiKode',
-        artwork: [{ src: 'https://papiromesa-ux.github.io/-MIZUSHIKODE-/assets/img/icon-musica-512.png', sizes: '512x512', type: 'image/png' }]
-      });
-      navigator.mediaSession.setActionHandler('play', reproducir);
-      navigator.mediaSession.setActionHandler('pause', pausar);
-      navigator.mediaSession.setActionHandler('previoustrack', anteriorCancion);
-      navigator.mediaSession.setActionHandler('nexttrack', siguienteCancion);
-    }
+  document.getElementById('filtros-genero').addEventListener('click', (e) => {
+    if(!e.target.classList.contains('pill')) return;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    
+    const filtro = e.target.getAttribute('data-filter');
+    listaFiltrada.innerHTML = '';
+    if(filtro === 'todo') return;
+
+    const resultados = canciones.filter(c => c.titulo.toLowerCase().includes(filtro));
+    resultados.forEach(c => listaFiltrada.appendChild(crearElementoLista(c, canciones.findIndex(orig => orig.titulo === c.titulo))));
+  });
+
+  // --- 8. EFECTO 3D EN LA CARÁTULA ---
+  fullCover.addEventListener('mousemove', (e) => {
+    const rect = fullCover.getBoundingClientRect();
+    const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+    const centerX = rect.width / 2; const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -10;
+    const rotateY = ((x - centerX) / centerX) * 10;
+    fullCover.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+  });
+  fullCover.addEventListener('mouseleave', () => {
+    fullCover.style.transform = `rotateX(0) rotateY(0) scale(1)`;
+  });
+
+  // --- 9. MODELO 3D ALEXANDER ---
+  async function cargarAlexander3D() {
+    const container = document.getElementById('vrm-container');
+    if(!container) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 20);
+    camera.position.set(0, 1.2, 3);
+    
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(150, 150);
+    container.appendChild(renderer.domElement);
+
+    const loader = new GLTFLoader();
+    loader.register((parser) => new VRMLoaderPlugin(parser));
+    
+    const urlVrm = 'https://papiromesa-ux.github.io/-MIZUSHIKODE-/Modelos/Modelos%20de%20preterminado/alexander.vrm';
+
+    loader.load(urlVrm, (gltf) => {
+      const vrm = gltf.userData.vrm;
+      VRMUtils.rotateVRM0(vrm);
+      scene.add(vrm.scene);
+
+      const light = new THREE.AmbientLight(0xffffff, 1.5);
+      scene.add(light);
+
+      const clock = new THREE.Clock();
+      function animate() {
+        requestAnimationFrame(animate);
+        vrm.update(clock.getDelta());
+        vrm.scene.position.y = Math.sin(clock.elapsedTime) * 0.05;
+        renderer.render(scene, camera);
+      }
+      animate();
+    }, undefined, (error) => {
+      console.error("Error al cargar a Alexander:", error);
+      container.innerHTML = '<p style="color:var(--aguamarina); font-size:0.8rem; text-align:center;">Cargando a Alexander...</p>';
+    });
   }
 
-  // INICIALIZAR
-  actualizarSaludo();
+  // --- INICIALIZAR ---
   cargarMusicaDesdeGitHub();
+  cargarAlexander3D();
 });
