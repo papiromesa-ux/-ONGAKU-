@@ -47,25 +47,49 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnHeartFull = document.getElementById('btn-heart-full');
   const fullCover = document.getElementById('full-cover');
 
-  // --- 1. FIREBASE & SSO ---
-  onAuthStateChanged(_secAuth, async (user) => {
-    if (user) {
-      usuarioActual = user;
-      const userEl = document.getElementById('user-display-name');
-      if(userEl) userEl.textContent = user.displayName || user.email.split('@')[0];
-
-      const docRef = doc(_db, "estudiantes", user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        misFavoritos = data.favoritos || [];
-        actualizarSaludo(data.genero);
-        actualizarCorazonUI();
-      }
-    } else {
-      window.location.href = "https://papiromesa-ux.github.io/-MIZUSHIKODE-/pages/login.html";
-    }
+  // --- 1. SONIDOS ASMR ALEATORIOS (Soluciona tu problema de los clicks) ---
+  const sonidos = [
+    new Audio('resources/audio/click1.mp3'),
+    new Audio('resources/audio/click2.mp3'),
+    new Audio('resources/audio/click3.mp3')
+  ];
+  
+  document.querySelectorAll('.btn-sonido').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Elige uno de los 3 al azar
+      const sonidoRandom = sonidos[Math.floor(Math.random() * sonidos.length)];
+      sonidoRandom.currentTime = 0;
+      sonidoRandom.volume = 0.3;
+      // El .catch evita que la app se rompa si el celular bloquea el audio
+      sonidoRandom.play().catch(e => {}); 
+    });
   });
+
+  // --- 2. FIREBASE (Blindado para que NO trabe los botones) ---
+  try {
+    onAuthStateChanged(_secAuth, async (user) => {
+      if (user) {
+        usuarioActual = user;
+        const userEl = document.getElementById('user-display-name');
+        if(userEl) userEl.textContent = user.displayName || user.email.split('@')[0];
+
+        const docRef = doc(_db, "estudiantes", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          misFavoritos = data.favoritos || [];
+          actualizarSaludo(data.genero);
+          actualizarCorazonUI();
+        }
+      } else {
+        window.location.href = "https://papiromesa-ux.github.io/-MIZUSHIKODE-/pages/login.html";
+      }
+    });
+  } catch(e) {
+    // Si Firebase falla, la app sigue funcionando y te saluda por defecto
+    console.log("Firebase no respondió, pero la app sigue funcionando.");
+    actualizarSaludo();
+  }
 
   function actualizarSaludo(genero = 'hombre') {
     const hora = new Date().getHours();
@@ -79,20 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
     else saludo = esFemenino ? "Hola, Noctámbura" : "Hola, Noctámbulo";
     
     const greetingEl = document.getElementById('dynamic-greeting');
-    if(greetingEl) greetingEl.textContent = saludo;
+    if(greetingEl) greetingEl.textContent = saludo; // Quita el "Cargando..."
   }
 
-  // --- 2. SONIDOS ASMR (Ruta: resources/audio/click1.mp3) ---
-  const sonidoClick = new Audio('resources/audio/click1.mp3');
-  document.querySelectorAll('.btn-sonido').forEach(btn => {
-    btn.addEventListener('click', () => {
-      sonidoClick.currentTime = 0;
-      sonidoClick.volume = 0.3;
-      sonidoClick.play().catch(e => {});
-    });
-  });
-
-  // --- 3. CARGAR MÚSICA (Ruta: musicas/fondo) ---
+  // --- 3. CARGAR MÚSICA ---
   async function cargarMusicaDesdeGitHub() {
     try {
       const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${CARPETA_MUSICA}?ref=${GITHUB_BRANCH}&per_page=100`;
@@ -155,9 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function reproducir() {
     if (!audio.src && canciones.length > 0) cargarCancion(0);
-    audio.play();
-    isPlaying = true;
-    actualizarBotonesPlay(true);
+    audio.play().then(() => {
+      isPlaying = true;
+      actualizarBotonesPlay(true);
+    }).catch(e => console.log("Toca de nuevo para reproducir"));
   }
 
   function pausar() {
@@ -166,7 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarBotonesPlay(false);
   }
 
-  function togglePlay() { isPlaying ? pausar() : reproducir(); }
+  function togglePlay() { 
+    if (isPlaying) pausar();
+    else reproducir();
+  }
 
   function actualizarBotonesPlay(playing) {
     const icon = playing ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
@@ -174,34 +192,23 @@ document.addEventListener('DOMContentLoaded', () => {
     iconPlayMain.innerHTML = icon;
   }
 
-  // --- 5. FAVORITOS ---
-  function actualizarCorazonUI() {
-    if(canciones.length === 0) return;
-    const cancionActual = canciones[currentTrackIndex].titulo;
-    if(misFavoritos.includes(cancionActual)) btnHeartFull.classList.add('active');
-    else btnHeartFull.classList.remove('active');
-  }
-
-  btnHeartFull.addEventListener('click', async () => {
-    if(!usuarioActual || canciones.length === 0) return;
-    const cancionActual = canciones[currentTrackIndex].titulo;
-    const docRef = doc(_db, "estudiantes", usuarioActual.uid);
-
-    if (misFavoritos.includes(cancionActual)) {
-      await updateDoc(docRef, { favoritos: arrayRemove(cancionActual) });
-      misFavoritos = misFavoritos.filter(c => c !== cancionActual);
-    } else {
-      await updateDoc(docRef, { favoritos: arrayUnion(cancionActual) });
-      misFavoritos.push(cancionActual);
-    }
-    actualizarCorazonUI();
-  });
-
-  // --- 6. BOTONES ---
+  // --- 5. BOTONES (Asignados directamente para que funcionen sí o sí) ---
   btnMiniPlay.addEventListener('click', togglePlay);
   btnPlayMain.addEventListener('click', togglePlay);
-  btnNext.addEventListener('click', () => { currentTrackIndex = (currentTrackIndex + 1) % canciones.length; cargarCancion(currentTrackIndex); if(isPlaying) reproducir(); });
-  btnPrev.addEventListener('click', () => { currentTrackIndex = (currentTrackIndex - 1 + canciones.length) % canciones.length; cargarCancion(currentTrackIndex); if(isPlaying) reproducir(); });
+  
+  btnNext.addEventListener('click', () => { 
+    if(canciones.length === 0) return;
+    currentTrackIndex = (currentTrackIndex + 1) % canciones.length; 
+    cargarCancion(currentTrackIndex); 
+    if(isPlaying) reproducir(); 
+  });
+  
+  btnPrev.addEventListener('click', () => { 
+    if(canciones.length === 0) return;
+    currentTrackIndex = (currentTrackIndex - 1 + canciones.length) % canciones.length; 
+    cargarCancion(currentTrackIndex); 
+    if(isPlaying) reproducir(); 
+  });
   
   btnShuffle.addEventListener('click', () => { isShuffle = !isShuffle; btnShuffle.style.color = isShuffle ? 'var(--aguamarina)' : 'var(--texto-dim)'; });
   btnRepeat.addEventListener('click', () => { isRepeat = !isRepeat; btnRepeat.style.color = isRepeat ? 'var(--aguamarina)' : 'var(--texto-dim)'; });
@@ -228,6 +235,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const m = Math.floor(sec / 60); const s = Math.floor(sec % 60);
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
+
+  // --- 6. FAVORITOS ---
+  function actualizarCorazonUI() {
+    if(canciones.length === 0) return;
+    const cancionActual = canciones[currentTrackIndex].titulo;
+    if(misFavoritos.includes(cancionActual)) btnHeartFull.classList.add('active');
+    else btnHeartFull.classList.remove('active');
+  }
+
+  btnHeartFull.addEventListener('click', async () => {
+    if(!usuarioActual || canciones.length === 0) return;
+    const cancionActual = canciones[currentTrackIndex].titulo;
+    const docRef = doc(_db, "estudiantes", usuarioActual.uid);
+
+    if (misFavoritos.includes(cancionActual)) {
+      await updateDoc(docRef, { favoritos: arrayRemove(cancionActual) });
+      misFavoritos = misFavoritos.filter(c => c !== cancionActual);
+    } else {
+      await updateDoc(docRef, { favoritos: arrayUnion(cancionActual) });
+      misFavoritos.push(cancionActual);
+    }
+    actualizarCorazonUI();
+  });
 
   // --- 7. BÚSQUEDA Y FILTROS ---
   buscador.addEventListener('input', (e) => {
@@ -265,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fullCover.style.transform = `rotateX(0) rotateY(0) scale(1)`;
   });
 
-  // --- 9. MODELO 3D ALEXANDER (Ruta: ./alexander.vrm) ---
+  // --- 9. MODELO 3D ALEXANDER ---
   async function cargarAlexander3D() {
     const container = document.getElementById('vrm-container');
     if(!container) return;
@@ -301,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
       animate();
     }, undefined, (error) => {
       console.error("Error al cargar a Alexander:", error);
-      container.innerHTML = '<p style="color:var(--aguamarina); font-size:0.8rem; text-align:center;">Cargando...</p>';
+      container.innerHTML = '<p style="color:var(--aguamarina); font-size:0.8rem; text-align:center;">Modelo en mantenimiento</p>';
     });
   }
 
