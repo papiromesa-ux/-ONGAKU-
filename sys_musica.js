@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user) {
       usuarioActual = user;
       const userEl = document.getElementById('user-display-name');
-      userEl.textContent = user.displayName || user.email.split('@')[0];
+      if(userEl) userEl.textContent = user.displayName || user.email.split('@')[0];
 
       const docRef = doc(_db, "estudiantes", user.uid);
       const docSnap = await getDoc(docRef);
@@ -78,11 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (hora >= 19 && hora < 22) saludo = "Buenas noches";
     else saludo = esFemenino ? "Hola, Noctámbura" : "Hola, Noctámbulo";
     
-    document.getElementById('dynamic-greeting').textContent = saludo;
+    const greetingEl = document.getElementById('dynamic-greeting');
+    if(greetingEl) greetingEl.textContent = saludo;
   }
 
-  // --- 2. SONIDOS ASMR ---
-  const sonidoClick = new Audio('assets/sonidos/click.mp3');
+  // --- 2. SONIDOS ASMR (Ruta: resources/audio/click1.mp3) ---
+  const sonidoClick = new Audio('resources/audio/click1.mp3');
   document.querySelectorAll('.btn-sonido').forEach(btn => {
     btn.addEventListener('click', () => {
       sonidoClick.currentTime = 0;
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- 3. CARGAR MÚSICA (Límite 100) ---
+  // --- 3. CARGAR MÚSICA (Ruta: musicas/fondo) ---
   async function cargarMusicaDesdeGitHub() {
     try {
       const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${CARPETA_MUSICA}?ref=${GITHUB_BRANCH}&per_page=100`;
@@ -264,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fullCover.style.transform = `rotateX(0) rotateY(0) scale(1)`;
   });
 
-  // --- 9. MODELO 3D ALEXANDER ---
+  // --- 9. MODELO 3D ALEXANDER (Ruta: ./alexander.vrm) ---
   async function cargarAlexander3D() {
     const container = document.getElementById('vrm-container');
     if(!container) return;
@@ -280,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loader = new GLTFLoader();
     loader.register((parser) => new VRMLoaderPlugin(parser));
     
-    const urlVrm = 'https://papiromesa-ux.github.io/-MIZUSHIKODE-/Modelos/Modelos%20de%20preterminado/alexander.vrm';
+    const urlVrm = './alexander.vrm';
 
     loader.load(urlVrm, (gltf) => {
       const vrm = gltf.userData.vrm;
@@ -300,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
       animate();
     }, undefined, (error) => {
       console.error("Error al cargar a Alexander:", error);
-      container.innerHTML = '<p style="color:var(--aguamarina); font-size:0.8rem; text-align:center;">Cargando a Alexander...</p>';
+      container.innerHTML = '<p style="color:var(--aguamarina); font-size:0.8rem; text-align:center;">Cargando...</p>';
     });
   }
 
