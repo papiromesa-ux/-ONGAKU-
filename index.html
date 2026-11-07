@@ -3,20 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ONGAKU - Academia MizushiKode</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <title>ONGAKU - Conector de MizushiKode</title>
+  
+  <!-- FUENTE BEBAS NEUE (Punto 7) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="musica.css">
   <link rel="manifest" href="manifest-musica.json">
-  <meta name="theme-color" content="#ff2e97">
+  <meta name="theme-color" content="#0a192f">
 </head>
 <body>
+
+  <!-- FONDO ANIMADO (Punto 2 y 12) -->
+  <div class="bg-animated">
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    <div class="bubble bubble-5"></div>
+  </div>
 
   <!-- PANTALLA PRINCIPAL -->
   <div id="app-container">
     
     <!-- Header -->
     <header class="top-bar">
-      <div class="logo">ONGAKU</div>
+      <div class="logo-container">
+        <div class="logo">ONGAKU</div>
+        <div class="badge-mizushi">Powered by MizushiKode</div> <!-- Punto 16 -->
+      </div>
       <div class="top-icons">
         <button id="btn-open-settings" class="btn-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -29,14 +46,15 @@
       
       <!-- Pestaña: Inicio -->
       <section id="tab-inicio" class="tab-content active">
-        <h1 class="greeting">Hola, noctámbulo</h1>
+        <h1 class="greeting" id="dynamic-greeting">Cargando...</h1>
         
         <div class="section-title">Tus artistas favoritos</div>
         <div class="horizontal-scroll">
-          <div class="artist-circle" style="background: var(--magenta);">A</div>
-          <div class="artist-circle" style="background: var(--cian);">M</div>
-          <div class="artist-circle" style="background: var(--violeta);">Z</div>
-          <div class="artist-circle" style="background: #333;">K</div>
+          <!-- HUECOS PARA IMÁGENES DE ARTISTAS (Punto 14) -->
+          <div class="artist-circle img-alexander"></div>
+          <div class="artist-circle img-andrea"></div>
+          <div class="artist-circle img-akari"></div>
+          <div class="artist-circle img-zalgert"></div>
         </div>
 
         <div class="section-title">Tendencias de la Academia</div>
@@ -48,29 +66,32 @@
       <!-- Pestaña: Explorar -->
       <section id="tab-explorar" class="tab-content">
         <h1>Explorar</h1>
+        <!-- PUNTO 3: Filtros de géneros -->
         <div class="filter-pills">
-          <button class="pill active">Todo</button>
-          <button class="pill">Lofi</button>
-          <button class="pill">Electrónica</button>
-          <button class="pill">Rock</button>
+          <button class="pill active" data-filter="todo">Todo</button>
+          <button class="pill" data-filter="piano">Piano</button>
+          <button class="pill" data-filter="instrumental">Instrumental</button>
+          <button class="pill" data-filter="electronica">Electrónica</button>
+          <button class="pill" data-filter="rock">Rock</button>
+          <button class="pill" data-filter="violin">Violín</button>
         </div>
         
         <div class="genre-grid">
-          <div class="genre-card bg-pink">Música</div>
-          <div class="genre-card bg-cyan">Podcasts</div>
-          <div class="genre-card bg-purple">Lofi Beats</div>
-          <div class="genre-card bg-orange">Eventos</div>
-          <div class="genre-card bg-blue">Nuevos</div>
-          <div class="genre-card bg-green">Latina</div>
+          <div class="genre-card bg-tornasol">Música</div>
+          <div class="genre-card bg-aguamarina">Lofi Beats</div>
+          <div class="genre-card bg-menta">Relax</div>
+          <div class="genre-card bg-turquesa">Gaming</div>
+          <div class="genre-card bg-azul">Estudio</div>
+          <div class="genre-card bg-tornasol">Nuevos</div>
         </div>
       </section>
 
       <!-- Pestaña: Favoritos / Biblioteca -->
       <section id="tab-favoritos" class="tab-content">
         <h1>Tu Biblioteca</h1>
-        <p style="color: #aaa; margin-bottom: 20px;">Explora la nube de MizushiKode.</p>
+        <p style="color: var(--texto-dim); margin-bottom: 20px;">Explora la nube de MizushiKode.</p>
         <ul id="lista-canciones" class="song-list">
-          <!-- JS inyectará las 101 canciones de GitHub aquí -->
+          <!-- JS inyectará las canciones de GitHub aquí -->
         </ul>
       </section>
 
@@ -88,7 +109,7 @@
 
     </main>
 
-    <!-- Navegación Inferior (Mobile) -->
+    <!-- Navegación Inferior -->
     <nav class="bottom-nav">
       <button class="nav-item active" data-tab="tab-inicio">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -104,9 +125,10 @@
       </button>
     </nav>
 
-    <!-- Reproductor Mini (Fijo abajo) -->
+    <!-- Reproductor Mini -->
     <div id="mini-player" class="mini-player">
-      <div class="mini-cover">ON</div>
+      <!-- HUECO PARA CARÁTULA (Punto 14) -->
+      <div class="mini-cover img-cover-default"></div>
       <div class="mini-info">
         <div id="mini-title">Cargando música...</div>
         <div id="mini-artist">ONGAKU Lofi</div>
@@ -123,13 +145,11 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
         <span>Reproduciendo</span>
-        <button class="btn-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-        </button>
+        <button class="btn-icon"></button>
       </header>
 
-      <div class="full-cover" id="full-cover">
-        <!-- Visualizador CSS -->
+      <!-- HUECO PARA FONDO DEL REPRODUCTOR (Punto 14) -->
+      <div class="full-cover img-full-bg" id="full-cover">
         <div class="waveform">
           <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
           <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -158,7 +178,7 @@
       </div>
     </div>
 
-    <!-- Pantalla de Ajustes (Oculta) -->
+    <!-- Pantalla de Ajustes -->
     <div id="settings-screen" class="settings-screen">
       <header class="full-header">
         <button id="btn-close-settings" class="btn-icon">
@@ -170,14 +190,14 @@
       <div class="settings-content">
         <div class="settings-group">Cuenta</div>
         <div class="settings-item">Administración de cuenta <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-        <div class="settings-item">Cambiar correo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
         
         <div class="settings-group">Preferencias</div>
-        <div class="settings-item">Calidad de Audio <span style="color: var(--cian);">Alta (320kbps)</span></div>
+        <div class="settings-item">Calidad de Audio <span style="color: var(--aguamarina);">Alta (320kbps)</span></div>
         <div class="settings-item">Modo sin conexión <div class="toggle active"></div></div>
         
         <div class="settings-group">MizushiKode</div>
-        <a href="../index.html" class="settings-item" style="color: var(--magenta); text-decoration: none;">Volver a la Academia <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></a>
+        <!-- PUNTO 17: Enlace correcto de vuelta -->
+        <a href="https://papiromesa-ux.github.io/-MIZUSHIKODE-/" class="settings-item" style="color: var(--tornasol-2); text-decoration: none;">Volver a la Academia <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></a>
       </div>
     </div>
 
