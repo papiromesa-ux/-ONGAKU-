@@ -5,18 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ONGAKU - Conector de MizushiKode</title>
   
-  <!-- FUENTE BEBAS NEUE (Punto 7) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="musica.css">
   <link rel="manifest" href="manifest-musica.json">
-  <meta name="theme-color" content="#0a192f">
+  <meta name="theme-color" content="#020c1b">
 </head>
 <body>
 
-  <!-- FONDO ANIMADO (Punto 2 y 12) -->
+  <!-- FONDO ANIMADO (Burbujas) -->
   <div class="bg-animated">
     <div class="bubble bubble-1"></div>
     <div class="bubble bubble-2"></div>
@@ -25,130 +24,126 @@
     <div class="bubble bubble-5"></div>
   </div>
 
-  <!-- PANTALLA PRINCIPAL -->
   <div id="app-container">
-    
-    <!-- Header -->
     <header class="top-bar">
       <div class="logo-container">
         <div class="logo">ONGAKU</div>
-        <div class="badge-mizushi">Powered by MizushiKode</div> <!-- Punto 16 -->
+        <div class="badge-mizushi">Powered by MizushiKode</div>
       </div>
       <div class="top-icons">
-        <button id="btn-open-settings" class="btn-icon">
+        <button id="btn-open-settings" class="btn-icon btn-sonido">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
       </div>
     </header>
 
-    <!-- Contenido de Pestañas -->
     <main class="main-content">
       
-      <!-- Pestaña: Inicio -->
+      <!-- INICIO -->
       <section id="tab-inicio" class="tab-content active">
+        <!-- Contenedor para el Modelo 3D (Alexander/Andrea) -->
+        <div id="vrm-container" class="vrm-box"></div>
+        
         <h1 class="greeting" id="dynamic-greeting">Cargando...</h1>
         
         <div class="section-title">Tus artistas favoritos</div>
         <div class="horizontal-scroll">
-          <!-- HUECOS PARA IMÁGENES DE ARTISTAS (Punto 14) -->
-          <div class="artist-circle img-alexander"></div>
-          <div class="artist-circle img-andrea"></div>
-          <div class="artist-circle img-akari"></div>
-          <div class="artist-circle img-zalgert"></div>
+          <div class="artist-circle img-alexander">A</div>
+          <div class="artist-circle img-andrea">A</div>
+          <div class="artist-circle img-akari">A</div>
+          <div class="artist-circle img-zalgert">Z</div>
         </div>
 
-        <div class="section-title">Tendencias de la Academia</div>
-        <ul id="lista-tendencias" class="song-list">
-          <!-- JS inyectará canciones aquí -->
-        </ul>
+        <div class="section-title">Tendencias</div>
+        <ul id="lista-tendencias" class="song-list"></ul>
       </section>
 
-      <!-- Pestaña: Explorar -->
+      <!-- EXPLORAR -->
       <section id="tab-explorar" class="tab-content">
         <h1>Explorar</h1>
-        <!-- PUNTO 3: Filtros de géneros -->
-        <div class="filter-pills">
-          <button class="pill active" data-filter="todo">Todo</button>
-          <button class="pill" data-filter="piano">Piano</button>
-          <button class="pill" data-filter="instrumental">Instrumental</button>
-          <button class="pill" data-filter="electronica">Electrónica</button>
-          <button class="pill" data-filter="rock">Rock</button>
-          <button class="pill" data-filter="violin">Violín</button>
+        <div class="filter-pills" id="filtros-genero">
+          <button class="pill active btn-sonido" data-filter="todo">Todo</button>
+          <button class="pill btn-sonido" data-filter="piano">Piano</button>
+          <button class="pill btn-sonido" data-filter="instrumental">Instrumental</button>
+          <button class="pill btn-sonido" data-filter="himno">Himnos</button>
+          <button class="pill btn-sonido" data-filter="electronica">Electrónica</button>
+          <button class="pill btn-sonido" data-filter="rock">Rock</button>
+          <button class="pill btn-sonido" data-filter="guitarra">Guitarra</button>
+          <button class="pill btn-sonido" data-filter="violin">Violín</button>
+          <button class="pill btn-sonido" data-filter="avanzada">Avanzada</button>
         </div>
         
         <div class="genre-grid">
-          <div class="genre-card bg-tornasol">Música</div>
-          <div class="genre-card bg-aguamarina">Lofi Beats</div>
-          <div class="genre-card bg-menta">Relax</div>
-          <div class="genre-card bg-turquesa">Gaming</div>
-          <div class="genre-card bg-azul">Estudio</div>
-          <div class="genre-card bg-tornasol">Nuevos</div>
+          <div class="genre-card bg-tornasol btn-sonido">Música</div>
+          <div class="genre-card bg-aguamarina btn-sonido">Lofi Beats</div>
+          <div class="genre-card bg-menta btn-sonido">Relax</div>
+          <div class="genre-card bg-turquesa btn-sonido">Gaming</div>
+          <div class="genre-card bg-azul btn-sonido">Estudio</div>
+          <div class="genre-card bg-tornasol btn-sonido">Nuevos</div>
         </div>
+
+        <div class="section-title" style="margin-top: 2rem;">Resultados</div>
+        <ul id="lista-filtrada" class="song-list"></ul>
       </section>
 
-      <!-- Pestaña: Favoritos / Biblioteca -->
+      <!-- FAVORITOS -->
       <section id="tab-favoritos" class="tab-content">
         <h1>Tu Biblioteca</h1>
-        <p style="color: var(--texto-dim); margin-bottom: 20px;">Explora la nube de MizushiKode.</p>
-        <ul id="lista-canciones" class="song-list">
-          <!-- JS inyectará las canciones de GitHub aquí -->
-        </ul>
+        <p style="color: var(--texto-dim); margin-bottom: 20px; font-family: 'Inter', sans-serif;">Explora la nube de MizushiKode.</p>
+        <ul id="lista-canciones" class="song-list"></ul>
       </section>
 
-      <!-- Pestaña: Búsqueda -->
+      <!-- BÚSQUEDA -->
       <section id="tab-busqueda" class="tab-content">
         <h1>Buscar</h1>
         <div class="search-bar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <input type="text" id="buscador" placeholder="Artistas, canciones, podcasts...">
         </div>
-        <ul id="lista-busqueda" class="song-list" style="margin-top: 20px;">
-          <!-- JS inyectará resultados aquí -->
-        </ul>
+        <ul id="lista-busqueda" class="song-list" style="margin-top: 20px;"></ul>
       </section>
-
     </main>
 
-    <!-- Navegación Inferior -->
+    <!-- NAVEGACIÓN -->
     <nav class="bottom-nav">
-      <button class="nav-item active" data-tab="tab-inicio">
+      <button class="nav-item active btn-sonido" data-tab="tab-inicio">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       </button>
-      <button class="nav-item" data-tab="tab-explorar">
+      <button class="nav-item btn-sonido" data-tab="tab-explorar">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2.19 12.19L6 18l3.81-8.19L18 6l-3.81 8.19z"/></svg>
       </button>
-      <button class="nav-item" data-tab="tab-favoritos">
+      <button class="nav-item btn-sonido" data-tab="tab-favoritos">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
       </button>
-      <button class="nav-item" data-tab="tab-busqueda">
+      <button class="nav-item btn-sonido" data-tab="tab-busqueda">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
       </button>
     </nav>
 
-    <!-- Reproductor Mini -->
+    <!-- MINI REPRODUCTOR -->
     <div id="mini-player" class="mini-player">
-      <!-- HUECO PARA CARÁTULA (Punto 14) -->
       <div class="mini-cover img-cover-default"></div>
       <div class="mini-info">
-        <div id="mini-title">Cargando música...</div>
+        <div id="mini-title">Cargando...</div>
         <div id="mini-artist">ONGAKU Lofi</div>
       </div>
-      <button id="mini-play" class="btn-play-mini">
+      <button id="mini-play" class="btn-play-mini btn-sonido">
         <svg id="mini-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       </button>
     </div>
 
-    <!-- Reproductor Pantalla Completa -->
+    <!-- REPRODUCTOR FULL -->
     <div id="full-player" class="full-player">
       <header class="full-header">
-        <button id="btn-close-full" class="btn-icon">
+        <button id="btn-close-full" class="btn-icon btn-sonido">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
         <span>Reproduciendo</span>
-        <button class="btn-icon"></button>
+        <button class="btn-icon btn-sonido" id="btn-heart-full">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
       </header>
 
-      <!-- HUECO PARA FONDO DEL REPRODUCTOR (Punto 14) -->
       <div class="full-cover img-full-bg" id="full-cover">
         <div class="waveform">
           <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -170,18 +165,20 @@
       </div>
 
       <div class="full-controls">
-        <button class="btn-control"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
-        <button id="btn-play-main" class="btn-play-main">
+        <button id="btn-shuffle" class="btn-control btn-sonido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg></button>
+        <button id="btn-prev" class="btn-control btn-sonido"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+        <button id="btn-play-main" class="btn-play-main btn-sonido">
           <svg id="icon-play-main" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         </button>
-        <button class="btn-control"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+        <button id="btn-next" class="btn-control btn-sonido"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+        <button id="btn-repeat" class="btn-control btn-sonido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg></button>
       </div>
     </div>
 
-    <!-- Pantalla de Ajustes -->
+    <!-- AJUSTES -->
     <div id="settings-screen" class="settings-screen">
       <header class="full-header">
-        <button id="btn-close-settings" class="btn-icon">
+        <button id="btn-close-settings" class="btn-icon btn-sonido">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         </button>
         <span>Ajustes</span>
@@ -192,18 +189,18 @@
         <div class="settings-item">Administración de cuenta <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
         
         <div class="settings-group">Preferencias</div>
-        <div class="settings-item">Calidad de Audio <span style="color: var(--aguamarina);">Alta (320kbps)</span></div>
-        <div class="settings-item">Modo sin conexión <div class="toggle active"></div></div>
+        <div class="settings-item">Calidad de Audio <span style="color: var(--aguamarina);">Alta</span></div>
+        <div class="settings-item">Modo sin conexión <div class="toggle active" id="toggle-offline"></div></div>
         
         <div class="settings-group">MizushiKode</div>
-        <!-- PUNTO 17: Enlace correcto de vuelta -->
-        <a href="https://papiromesa-ux.github.io/-MIZUSHIKODE-/" class="settings-item" style="color: var(--tornasol-2); text-decoration: none;">Volver a la Academia <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></a>
+        <a href="https://papiromesa-ux.github.io/-MIZUSHIKODE-/" class="settings-item btn-sonido" style="color: var(--tornasol-1); text-decoration: none;">Volver a la Academia <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></a>
       </div>
     </div>
-
   </div>
 
   <audio id="audio-player"></audio>
+  
+  <!-- Scripts (Fase 2) -->
   <script src="sys_musica.js"></script>
 </body>
 </html>
