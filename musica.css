@@ -170,3 +170,24 @@ button:active svg { transform: scale(0.85); color: var(--aguamarina); }
 .toggle.active { background: var(--aguamarina); }
 .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: 0.3s; }
 .toggle.active::after { left: 21px; }
+
+/* NUEVOS AJUSTES FASE 2 */
+.vrm-box {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 1rem auto;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 245, 212, 0.2) 0%, transparent 70%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.img-alexander, .img-andrea, .img-akari, .img-zalgert {
+  display: flex; justify-content: center; align-items: center; 
+  font-size: 2rem; font-weight: bold; color: #fff;
+}
+
+/* Efecto visual para favoritos */
+.btn-icon.active svg { fill: var(--tornasol-1); stroke: var(--tornasol-1); }
