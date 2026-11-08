@@ -1,6 +1,4 @@
-import { _db, _secAuth } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+// Ya no importamos arriba, usamos importación dinámica.
 
 document.addEventListener('DOMContentLoaded', () => {
   
@@ -18,7 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const audio = document.getElementById('audio-player');
   const loadingScreen = document.getElementById('loading-screen');
 
-  // --- 1. SONIDOS CLICK ---
+  // --- 1. OCULTAR PANTALLA DE CARGA INMEDIATAMENTE ---
+  // No esperamos a que cargue nada para quitar el "Cargando..." de la vista.
+  setTimeout(() => {
+    if(loadingScreen) loadingScreen.classList.add('hidden');
+  }, 800); // 0.8 segundos para que se vea bonito, pero no bloquea.
+
+  // --- 2. SONIDOS CLICK ---
   const sonidos = [
     new Audio('resources/audio/click1.mp3'),
     new Audio('resources/audio/click2.mp3'),
@@ -31,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- 2. SALUDO ---
+  // --- 3. SALUDO ---
   function actualizarSaludo(genero = 'hombre') {
     const hora = new Date().getHours();
     const esFemenino = genero.toLowerCase() === 'mujer' || genero.toLowerCase() === 'femenino';
@@ -44,26 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById('dynamic-greeting');
     if(el) el.textContent = saludo;
   }
-  actualizarSaludo(); // Quita el "Cargando..." inmediatamente
+  actualizarSaludo(); 
 
-  // --- 3. FIREBASE (Sin bloquear ni expulsar) ---
-  try {
-    onAuthStateChanged(_secAuth, async (user) => {
-      if (user) {
-        usuarioActual = user;
-        const docRef = doc(_db, "estudiantes", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          misFavoritos = data.favoritos || [];
-          actualizarSaludo(data.genero);
-        }
-      }
-      // Si no hay usuario, NO HACEMOS NADA. Lo dejamos escuchar como invitado.
-    });
-  } catch(e) { console.log("Firebase no cargó."); }
-
-  // --- 4. CARGAR CANCIONES ---
+  // --- 4. CARGAR CANCIONES (Prioridad Máxima) ---
   async function cargarMusicaDesdeGitHub() {
     try {
       const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${CARPETA_MUSICA}?ref=${GITHUB_BRANCH}&per_page=100`;
@@ -83,13 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
       canciones.forEach((c, i) => listaCanciones.appendChild(crearItem(c, i)));
 
       if(canciones.length > 0) cargarCancion(0);
-      if(loadingScreen) loadingScreen.classList.add('hidden');
 
-      document.dispatchEvent(new Event('ongakuReady')); // Avisa a los 3D
+      // Cargar los 3D en segundo plano
+      cargarModelos3D();
 
     } catch (error) {
       console.error("Error de GitHub:", error);
-      if(loadingScreen) loadingScreen.classList.add('hidden');
     }
   }
 
@@ -147,51 +133,73 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('time-total').textContent = isNaN(audio.duration) ? "0:00" : `${Math.floor(audio.duration/60)}:${Math.floor(audio.duration%60).toString().padStart(2,'0')}`;
   };
 
-  // --- INICIAR ---
-  cargarMusicaDesdeGitHub();
-});
+  // --- 6. FIREBASE (Carga Diferida) ---
+  async function iniciarFirebase() {
+    try {
+      const { _db, _secAuth } = await import("./firebase.js");
+      const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js");
+      const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js");
 
-// --- 6. CARGAR MODELOS 3D (Separado) ---
-document.addEventListener('ongakuReady', async () => {
-  try {
-    const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
-    const { GLTFLoader } = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
-    const { VRMLoaderPlugin, VRMUtils } = await import('https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.0.0/lib/three-vrm.module.js');
+      onAuthStateChanged(_secAuth, async (user) => {
+        if (user) {
+          usuarioActual = user;
+          const docRef = doc(_db, "estudiantes", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            misFavoritos = data.favoritos || [];
+            actualizarSaludo(data.genero);
+          }
+        }
+      });
+    } catch(e) { console.log("Firebase offline"); }
+  }
 
-    const containerAudifonos = document.getElementById('canvas-loading');
-    if(containerAudifonos) {
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-      camera.position.set(0, 0, 5);
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setSize(250, 250);
-      containerAudifonos.appendChild(renderer.domElement);
-      scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-      const dir = new THREE.DirectionalLight(0x00f5d4, 2); dir.position.set(5, 5, 5); scene.add(dir);
-      
-      new GLTFLoader().load('./audifonos.glb', (gltf) => {
-        const m = gltf.scene; scene.add(m);
-        (function animate() { requestAnimationFrame(animate); m.rotation.y += 0.01; renderer.render(scene, camera); })();
-      }, undefined, (e) => console.log("Error audífonos"));
-    }
+  // --- 7. MODELOS 3D (Carga ultra diferida) ---
+  async function cargarModelos3D() {
+    try {
+      const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+      const { GLTFLoader } = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
+      const { VRMLoaderPlugin, VRMUtils } = await import('https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.0.0/lib/three-vrm.module.js');
 
-    const containerVrm = document.getElementById('vrm-container');
-    if(containerVrm) {
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 20);
-      camera.position.set(0, 1.2, 3);
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setSize(150, 150);
-      containerVrm.appendChild(renderer.domElement);
-      const loader = new GLTFLoader();
-      loader.register((parser) => new VRMLoaderPlugin(parser));
-      
-      loader.load('./alexander.vrm', (gltf) => {
-        const vrm = gltf.userData.vrm; VRMUtils.rotateVRM0(vrm); scene.add(vrm.scene);
+      const containerAudifonos = document.getElementById('canvas-loading');
+      if(containerAudifonos) {
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(0, 0, 5);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(250, 250);
+        containerAudifonos.appendChild(renderer.domElement);
         scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-        const clock = new THREE.Clock();
-        (function animate() { requestAnimationFrame(animate); vrm.update(clock.getDelta()); vrm.scene.position.y = Math.sin(clock.elapsedTime) * 0.05; renderer.render(scene, camera); })();
-      }, undefined, (e) => console.log("Error Alexander"));
-    }
-  } catch (error) { console.log("Modelos 3D fallaron, pero la app funciona."); }
+        
+        new GLTFLoader().load('./audifonos.glb', (gltf) => {
+          const m = gltf.scene; scene.add(m);
+          (function animate() { requestAnimationFrame(animate); m.rotation.y += 0.01; renderer.render(scene, camera); })();
+        });
+      }
+
+      const containerVrm = document.getElementById('vrm-container');
+      if(containerVrm) {
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 20);
+        camera.position.set(0, 1.2, 3);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(150, 150);
+        containerVrm.appendChild(renderer.domElement);
+        const loader = new GLTFLoader();
+        loader.register((parser) => new VRMLoaderPlugin(parser));
+        
+        loader.load('./alexander.vrm', (gltf) => {
+          const vrm = gltf.userData.vrm; VRMUtils.rotateVRM0(vrm); scene.add(vrm.scene);
+          scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+          const clock = new THREE.Clock();
+          (function animate() { requestAnimationFrame(animate); vrm.update(clock.getDelta()); vrm.scene.position.y = Math.sin(clock.elapsedTime) * 0.05; renderer.render(scene, camera); })();
+        });
+      }
+    } catch (error) { console.log("3D no cargados, pero app sí."); }
+  }
+
+  // --- INICIAR ---
+  cargarMusicaDesdeGitHub(); // Lo primero
+  iniciarFirebase();         // En segundo plano
 });
