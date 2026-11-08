@@ -1,11 +1,12 @@
-// Ocultar la pantalla de carga INMEDIATAMENTE para que no sea el LCP
-const loadingScreen = document.getElementById('loading-screen');
-if(loadingScreen) {
-  setTimeout(() => { loadingScreen.classList.add('hidden'); }, 100);
-}
+// 1. OCULTAR PANTALLA DE CARGA RÁPIDO
+setTimeout(() => {
+  const ls = document.getElementById('loading-screen');
+  if(ls) ls.classList.add('hidden');
+}, 600);
 
 document.addEventListener('DOMContentLoaded', () => {
   
+  // --- CONFIGURACIÓN Y VARIABLES ---
   const GITHUB_USER = "papiromesa-ux";
   const GITHUB_REPO = "-ONGAKU-";
   const GITHUB_BRANCH = "main";
@@ -15,11 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentTrackIndex = 0;
   let isPlaying = false;
   let usuarioActual = null;
-  let misFavoritos = [];
 
   const audio = document.getElementById('audio-player');
 
-  // --- 1. SONIDOS CLICK ---
+  // --- 2. CONECTAR BOTONES (PRIORIDAD 1 - A PRUEBA DE FALLOS) ---
+  const btnPlayMain = document.getElementById('btn-play-main');
+  const btnMiniPlay = document.getElementById('mini-play');
+  const iconPlayMain = document.getElementById('icon-play-main');
+  const miniIconPlay = document.getElementById('mini-icon-play');
+  const btnNext = document.getElementById('btn-next');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnCloseFull = document.getElementById('btn-close-full');
+  const miniPlayer = document.getElementById('mini-player');
+  const fullPlayer = document.getElementById('full-player');
+  const btnDownload = document.getElementById('btn-download');
+
+  // Sonidos ASMR
   const sonidos = [
     new Audio('resources/audio/click1.mp3'),
     new Audio('resources/audio/click2.mp3'),
@@ -28,26 +40,65 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.btn-sonido').forEach(btn => {
     btn.addEventListener('click', () => {
       const s = sonidos[Math.floor(Math.random() * sonidos.length)];
-      if(s) { s.currentTime = 0; s.volume = 0.3; s.play().catch(e => {}); }
+      if(s) { s.currentTime = 0; s.volume = 0.2; s.play().catch(e => {}); }
     });
   });
 
-  // --- 2. SALUDO ---
+  // Funciones Reproductor
+  function reproducir() { 
+    audio.play().then(() => { 
+      isPlaying = true; 
+      iconPlayMain.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; 
+      miniIconPlay.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; 
+    }).catch(e => console.log("Bloqueado")); 
+  }
+
+  function pausar() { 
+    audio.pause(); 
+    isPlaying = false; 
+    iconPlayMain.innerHTML = '<path d="M8 5v14l11-7z"/>'; 
+    miniIconPlay.innerHTML = '<path d="M8 5v14l11-7z"/>'; 
+  }
+
+  function togglePlay() { if(isPlaying) pausar(); else reproducir(); }
+
+  btnPlayMain.onclick = togglePlay;
+  btnMiniPlay.onclick = togglePlay;
+  
+  btnNext.onclick = () => { if(canciones.length) { currentTrackIndex = (currentTrackIndex + 1) % canciones.length; cargarCancion(currentTrackIndex); if(isPlaying) reproducir(); } };
+  btnPrev.onclick = () => { if(canciones.length) { currentTrackIndex = (currentTrackIndex - 1 + canciones.length) % canciones.length; cargarCancion(currentTrackIndex); if(isPlaying) reproducir(); } };
+  
+  btnCloseFull.onclick = () => fullPlayer.classList.remove('active');
+  miniPlayer.onclick = (e) => { if(!e.target.closest('button')) fullPlayer.classList.add('active'); };
+
+  btnDownload.onclick = () => {
+    if(canciones.length) {
+      const link = document.createElement('a');
+      link.href = canciones[currentTrackIndex].src;
+      link.download = canciones[currentTrackIndex].titulo + ".mp3";
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  // --- 3. SALUDO ---
   function actualizarSaludo(genero = 'hombre') {
     const hora = new Date().getHours();
     const esFemenino = genero.toLowerCase() === 'mujer' || genero.toLowerCase() === 'femenino';
     let saludo = "";
-    if (hora >= 1 && hora < 7) saludo = esFemenino ? "Hola, Madrugadora" : "Hola, Madrugador";
-    else if (hora >= 7 && hora < 13) saludo = "Buenos días";
-    else if (hora >= 13 && hora < 19) saludo = "Buen provecho";
-    else if (hora >= 19 && hora < 22) saludo = "Buenas noches";
-    else saludo = esFemenino ? "Hola, Noctámbura" : "Hola, Noctámbulo";
+    if (hora >= 1 && hora < 7) saludo = esFemenino ? "HOLA, MADRUGADORA" : "HOLA, MADRUGADOR";
+    else if (hora >= 7 && hora < 13) saludo = "BUENOS DÍAS";
+    else if (hora >= 13 && hora < 19) saludo = "BUEN PROVECHO";
+    else if (hora >= 19 && hora < 22) saludo = "BUENAS NOCHES";
+    else saludo = esFemenino ? "HOLA, NOCTÁMBURA" : "HOLA, NOCTÁMBULO";
     const el = document.getElementById('dynamic-greeting');
     if(el) el.textContent = saludo;
   }
   actualizarSaludo(); 
 
-  // --- 3. CARGAR CANCIONES ---
+  // --- 4. CARGAR CANCIONES ---
   async function cargarMusicaDesdeGitHub() {
     try {
       const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${CARPETA_MUSICA}?ref=${GITHUB_BRANCH}&per_page=100`;
@@ -55,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const archivos = await res.json();
 
       canciones = archivos.filter(a => a.name.endsWith('.mp3')).map(a => ({
-        titulo: a.name.replace('.mp3', '').replace(/_/g, ' '),
+        titulo: a.name.replace('.mp3', '').replace(/_/g, ' ').toUpperCase(),
         src: a.download_url
       }));
 
@@ -68,8 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if(canciones.length > 0) cargarCancion(0);
 
-      // Cargar los 3D y las imágenes en segundo plano
-      cargarImagenesSegundoPlano();
+      // Una vez cargada la música, disparamos lo demás en segundo plano
+      cargarFirebase();
       cargarModelos3D();
 
     } catch (error) {
@@ -87,15 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="song-artist">ONGAKU Lofi</div>
       </div>
     `;
-    const bgImg = document.querySelector('.song-cover');
-    if (bgImg && bgImg.style.backgroundImage) {
-       li.querySelector('.song-cover').style.backgroundImage = bgImg.style.backgroundImage;
-    }
-    li.onclick = () => { cargarCancion(index); reproducir(); document.getElementById('full-player').classList.add('active'); };
+    li.onclick = () => { cargarCancion(index); reproducir(); fullPlayer.classList.add('active'); };
     return li;
   }
 
-  // --- 4. REPRODUCTOR ---
   function cargarCancion(index) {
     if(!canciones[index]) return;
     currentTrackIndex = index;
@@ -104,28 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('full-title').textContent = canciones[index].titulo;
   }
 
-  function reproducir() { 
-    audio.play().then(() => { 
-      isPlaying = true; 
-      document.getElementById('mini-icon-play').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; 
-      document.getElementById('icon-play-main').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; 
-    }).catch(e => console.log("Bloqueado")); 
-  }
-
-  function pausar() { 
-    audio.pause(); 
-    isPlaying = false; 
-    document.getElementById('mini-icon-play').innerHTML = '<path d="M8 5v14l11-7z"/>'; 
-    document.getElementById('icon-play-main').innerHTML = '<path d="M8 5v14l11-7z"/>'; 
-  }
-
-  document.getElementById('mini-play').onclick = () => isPlaying ? pausar() : reproducir();
-  document.getElementById('btn-play-main').onclick = () => isPlaying ? pausar() : reproducir();
-  document.getElementById('btn-next').onclick = () => { if(canciones.length) { currentTrackIndex = (currentTrackIndex + 1) % canciones.length; cargarCancion(currentTrackIndex); if(isPlaying) reproducir(); } };
-  document.getElementById('btn-prev').onclick = () => { if(canciones.length) { currentTrackIndex = (currentTrackIndex - 1 + canciones.length) % canciones.length; cargarCancion(currentTrackIndex); if(isPlaying) reproducir(); } };
-  document.getElementById('btn-close-full').onclick = () => document.getElementById('full-player').classList.remove('active');
-  document.getElementById('mini-player').onclick = (e) => { if(!e.target.closest('button')) document.getElementById('full-player').classList.add('active'); };
-
+  // Eventos de audio
   audio.ontimeupdate = () => {
     const pct = (audio.currentTime / audio.duration) * 100;
     document.getElementById('progress-fill').style.width = `${pct || 0}%`;
@@ -135,31 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('time-total').textContent = isNaN(audio.duration) ? "0:00" : `${Math.floor(audio.duration/60)}:${Math.floor(audio.duration%60).toString().padStart(2,'0')}`;
   };
 
-  // --- 5. CARGAR IMÁGENES EN SEGUNDO PLANO ---
-  function cargarImagenesSegundoPlano() {
-    const imgBanner = new Image();
-    imgBanner.src = 'img/japon2.jpg';
-    imgBanner.onload = () => {
-      document.querySelector('.ongaku-banner').style.backgroundImage = `linear-gradient(to bottom, rgba(2, 12, 27, 0.3), rgba(2, 12, 27, 0.9)), url('img/japon2.jpg')`;
-    };
-
-    const imgCover = new Image();
-    imgCover.src = 'img/japon1.jpg';
-    imgCover.onload = () => {
-      document.querySelectorAll('.song-cover, .mini-cover').forEach(el => {
-        el.style.backgroundImage = `url('img/japon1.jpg')`;
-      });
-    };
-
-    const imgFull = new Image();
-    imgFull.src = 'img/japon4.jpg';
-    imgFull.onload = () => {
-      document.getElementById('full-cover').style.backgroundImage = `url('img/japon4.jpg')`;
-    };
-  }
-
-  // --- 6. FIREBASE ---
-  async function iniciarFirebase() {
+  // --- 5. FIREBASE (EN SEGUNDO PLANO) ---
+  async function cargarFirebase() {
     try {
       const { _db, _secAuth } = await import("./firebase.js");
       const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js");
@@ -172,37 +174,39 @@ document.addEventListener('DOMContentLoaded', () => {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             const data = docSnap.data();
-            misFavoritos = data.favoritos || [];
             actualizarSaludo(data.genero);
           }
         }
       });
-    } catch(e) { console.log("Firebase offline"); }
+    } catch(e) { console.log("Modo offline: Firebase no cargado."); }
   }
 
-  // --- 7. MODELOS 3D ---
+  // --- 6. MODELOS 3D (EN SEGUNDO PLANO) ---
   async function cargarModelos3D() {
     try {
       const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
       const { GLTFLoader } = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js');
       const { VRMLoaderPlugin, VRMUtils } = await import('https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.0.0/lib/three-vrm.module.js');
 
+      // Audífonos
       const containerAudifonos = document.getElementById('canvas-loading');
       if(containerAudifonos) {
+        containerAudifonos.innerHTML = ''; // Quitamos el fallback
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
         camera.position.set(0, 0, 5);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(250, 250);
+        renderer.setSize(200, 200);
         containerAudifonos.appendChild(renderer.domElement);
         scene.add(new THREE.AmbientLight(0xffffff, 1.5));
         
         new GLTFLoader().load('./audifonos.glb', (gltf) => {
           const m = gltf.scene; scene.add(m);
-          (function animate() { requestAnimationFrame(animate); m.rotation.y += 0.01; renderer.render(scene, camera); })();
-        });
+          (function animate() { requestAnimationFrame(animate); m.rotation.y += 0.02; renderer.render(scene, camera); })();
+        }, undefined, () => { containerAudifonos.innerHTML = '<div class="fallback-audifonos">🎧</div>'; });
       }
 
+      // Alexander
       const containerVrm = document.getElementById('vrm-container');
       if(containerVrm) {
         const scene = new THREE.Scene();
@@ -219,12 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
           scene.add(new THREE.AmbientLight(0xffffff, 1.5));
           const clock = new THREE.Clock();
           (function animate() { requestAnimationFrame(animate); vrm.update(clock.getDelta()); vrm.scene.position.y = Math.sin(clock.elapsedTime) * 0.05; renderer.render(scene, camera); })();
-        });
+        }, undefined, () => console.log("Alexander no disponible"));
       }
     } catch (error) { console.log("3D no cargados"); }
   }
 
-  // --- INICIAR ---
+  // --- 7. INICIAR ---
   cargarMusicaDesdeGitHub(); 
-  iniciarFirebase();         
 });
