@@ -1,0 +1,23 @@
+/* Títulos de Género */
+.genre-header {
+  font-size: 2rem;
+  color: var(--aguamarina);
+  margin: 2rem 0 1rem 0;
+  border-bottom: 2px solid rgba(0, 245, 212, 0.3);
+  padding-bottom: 5px;
+  text-shadow: 0 0 10px rgba(0, 245, 212, 0.3);
+}
+
+/* Contenedor de cada género */
+.genre-section {
+  margin-bottom: 2rem;
+  animation: fadeIn 0.5s ease;
+}
+
+/* Mensaje vacío */
+.empty-message {
+  font-family: 'Inter', sans-serif;
+  color: var(--texto-dim);
+  text-align: center;
+  margin-top: 3rem;
+}
