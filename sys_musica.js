@@ -20,7 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let usuarioActual = null;
   let misFavoritos = [];
 
+  // --- ELEMENTOS DEL DOM ---
   const audio = document.getElementById('audio-player');
+  const loadingScreen = document.getElementById('loading-screen');
   const listaCanciones = document.getElementById('lista-canciones');
   const listaTendencias = document.getElementById('lista-tendencias');
   const listaFiltrada = document.getElementById('lista-filtrada');
@@ -47,7 +49,42 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnHeartFull = document.getElementById('btn-heart-full');
   const fullCover = document.getElementById('full-cover');
 
-  // --- 1. SONIDOS ASMR ALEATORIOS (Soluciona tu problema de los clicks) ---
+  // --- 1. PANTALLA DE CARGA CON AUDÍFONOS 3D ---
+  function iniciarAudifonos3D() {
+    const container = document.getElementById('canvas-loading');
+    if(!container) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 5);
+    
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(250, 250);
+    container.appendChild(renderer.domElement);
+
+    const light = new THREE.AmbientLight(0xffffff, 1.5);
+    scene.add(light);
+    const dirLight = new THREE.DirectionalLight(0x00f5d4, 2);
+    dirLight.position.set(5, 5, 5);
+    scene.add(dirLight);
+
+    const loader = new GLTFLoader();
+    // Carga el modelo de los audífonos que subiste
+    loader.load('./audifonos.glb', (gltf) => {
+      const modelo = gltf.scene;
+      scene.add(modelo);
+
+      // Animación de rotación 360
+      function animate() {
+        requestAnimationFrame(animate);
+        modelo.rotation.y += 0.01; // Velocidad de giro
+        renderer.render(scene, camera);
+      }
+      animate();
+    });
+  }
+
+  // --- 2. SONIDOS ASMR ALEATORIOS ---
   const sonidos = [
     new Audio('resources/audio/click1.mp3'),
     new Audio('resources/audio/click2.mp3'),
@@ -56,16 +93,14 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.querySelectorAll('.btn-sonido').forEach(btn => {
     btn.addEventListener('click', () => {
-      // Elige uno de los 3 al azar
       const sonidoRandom = sonidos[Math.floor(Math.random() * sonidos.length)];
       sonidoRandom.currentTime = 0;
       sonidoRandom.volume = 0.3;
-      // El .catch evita que la app se rompa si el celular bloquea el audio
       sonidoRandom.play().catch(e => {}); 
     });
   });
 
-  // --- 2. FIREBASE (Blindado para que NO trabe los botones) ---
+  // --- 3. FIREBASE (Aislado) ---
   try {
     onAuthStateChanged(_secAuth, async (user) => {
       if (user) {
@@ -86,8 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   } catch(e) {
-    // Si Firebase falla, la app sigue funcionando y te saluda por defecto
-    console.log("Firebase no respondió, pero la app sigue funcionando.");
     actualizarSaludo();
   }
 
@@ -103,10 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
     else saludo = esFemenino ? "Hola, Noctámbura" : "Hola, Noctámbulo";
     
     const greetingEl = document.getElementById('dynamic-greeting');
-    if(greetingEl) greetingEl.textContent = saludo; // Quita el "Cargando..."
+    if(greetingEl) greetingEl.textContent = saludo; 
   }
 
-  // --- 3. CARGAR MÚSICA ---
+  // --- 4. CARGAR MÚSICA ---
   async function cargarMusicaDesdeGitHub() {
     try {
       const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${CARPETA_MUSICA}?ref=${GITHUB_BRANCH}&per_page=100`;
@@ -120,8 +153,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       renderizarListas();
       if(canciones.length > 0) cargarCancion(0);
+      
+      // Ocultar pantalla de carga cuando termine
+      loadingScreen.classList.add('hidden');
+
     } catch (error) {
       console.error("Error de GitHub:", error);
+      loadingScreen.classList.add('hidden'); // Ocultar aunque haya error
     }
   }
 
@@ -149,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canciones.forEach((c, i) => listaCanciones.appendChild(crearElementoLista(c, i)));
   }
 
-  // --- 4. REPRODUCTOR ---
+  // --- 5. REPRODUCTOR ---
   function cargarCancion(index) {
     if(canciones.length === 0) return;
     currentTrackIndex = index;
@@ -192,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     iconPlayMain.innerHTML = icon;
   }
 
-  // --- 5. BOTONES (Asignados directamente para que funcionen sí o sí) ---
+  // --- 6. BOTONES BLINDADOS (Funcionan sí o sí) ---
   btnMiniPlay.addEventListener('click', togglePlay);
   btnPlayMain.addEventListener('click', togglePlay);
   
@@ -236,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 
-  // --- 6. FAVORITOS ---
+  // --- 7. FAVORITOS ---
   function actualizarCorazonUI() {
     if(canciones.length === 0) return;
     const cancionActual = canciones[currentTrackIndex].titulo;
@@ -259,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarCorazonUI();
   });
 
-  // --- 7. BÚSQUEDA Y FILTROS ---
+  // --- 8. BÚSQUEDA Y FILTROS ---
   buscador.addEventListener('input', (e) => {
     const text = e.target.value.toLowerCase();
     listaBusqueda.innerHTML = '';
@@ -282,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resultados.forEach(c => listaFiltrada.appendChild(crearElementoLista(c, canciones.findIndex(orig => orig.titulo === c.titulo))));
   });
 
-  // --- 8. EFECTO 3D EN LA CARÁTULA ---
+  // --- 9. EFECTO 3D EN LA CARÁTULA ---
   fullCover.addEventListener('mousemove', (e) => {
     const rect = fullCover.getBoundingClientRect();
     const x = e.clientX - rect.left; const y = e.clientY - rect.top;
@@ -295,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fullCover.style.transform = `rotateX(0) rotateY(0) scale(1)`;
   });
 
-  // --- 9. MODELO 3D ALEXANDER ---
+  // --- 10. MODELO 3D ALEXANDER (En el inicio) ---
   async function cargarAlexander3D() {
     const container = document.getElementById('vrm-container');
     if(!container) return;
@@ -331,11 +369,12 @@ document.addEventListener('DOMContentLoaded', () => {
       animate();
     }, undefined, (error) => {
       console.error("Error al cargar a Alexander:", error);
-      container.innerHTML = '<p style="color:var(--aguamarina); font-size:0.8rem; text-align:center;">Modelo en mantenimiento</p>';
+      container.innerHTML = '<p style="color:var(--aguamarina); font-size:0.8rem; text-align:center;">Modelo no encontrado</p>';
     });
   }
 
-  // --- INICIALIZAR ---
-  cargarMusicaDesdeGitHub();
-  cargarAlexander3D();
+  // --- INICIALIZAR TODO ---
+  iniciarAudifonos3D(); // Inicia los audífonos girando
+  cargarMusicaDesdeGitHub(); // Carga la música (y quita la pantalla de carga al terminar)
+  cargarAlexander3D(); // Carga a Alexander flotando
 });
