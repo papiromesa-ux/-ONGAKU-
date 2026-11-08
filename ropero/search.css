@@ -1,0 +1,25 @@
+/* Estilos exclusivos de la búsqueda */
+.search-bar {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  border-radius: 20px;
+  gap: 15px;
+  margin-top: 1rem;
+}
+
+.search-bar svg {
+  width: 24px;
+  height: 24px;
+  color: var(--aguamarina);
+}
+
+.search-bar input {
+  background: none;
+  border: none;
+  color: var(--texto);
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  width: 100%;
+  outline: none;
+}
