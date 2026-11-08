@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ONGAKU - La banda sonora oficial de la Academia MizushiKode.">
   <title>ONGAKU - Conector de MizushiKode</title>
   
-  <!-- Añadido &display=swap para que las fuentes no bloqueen la carga -->
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  
   <link rel="stylesheet" href="musica.css">
 </head>
 <body>
@@ -31,7 +30,8 @@
         <div class="badge-mizushi">Powered by MizushiKode</div>
       </div>
       <div class="top-icons">
-        <button type="button" id="btn-open-settings" class="btn-icon btn-sonido">
+        <!-- Añadido aria-label para accesibilidad -->
+        <button type="button" id="btn-open-settings" class="btn-icon btn-sonido" aria-label="Abrir ajustes">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
       </div>
@@ -81,10 +81,10 @@
     </main>
 
     <nav class="bottom-nav">
-      <button type="button" class="nav-item active btn-sonido" data-tab="tab-inicio"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></button>
-      <button type="button" class="nav-item btn-sonido" data-tab="tab-explorar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2.19 12.19L6 18l3.81-8.19L18 6l-3.81 8.19z"/></svg></button>
-      <button type="button" class="nav-item btn-sonido" data-tab="tab-favoritos"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
-      <button type="button" class="nav-item btn-sonido" data-tab="tab-busqueda"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button>
+      <button type="button" class="nav-item active btn-sonido" data-tab="tab-inicio" aria-label="Inicio"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></button>
+      <button type="button" class="nav-item btn-sonido" data-tab="tab-explorar" aria-label="Explorar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2.19 12.19L6 18l3.81-8.19L18 6l-3.81 8.19z"/></svg></button>
+      <button type="button" class="nav-item btn-sonido" data-tab="tab-favoritos" aria-label="Favoritos"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
+      <button type="button" class="nav-item btn-sonido" data-tab="tab-busqueda" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button>
     </nav>
 
     <div id="mini-player" class="mini-player">
@@ -93,18 +93,18 @@
         <div id="mini-title">Cargando...</div>
         <div id="mini-artist">ONGAKU Lofi</div>
       </div>
-      <button type="button" id="mini-play" class="btn-play-mini btn-sonido">
+      <button type="button" id="mini-play" class="btn-play-mini btn-sonido" aria-label="Reproducir/Pausar">
         <svg id="mini-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       </button>
     </div>
 
     <div id="full-player" class="full-player">
       <header class="full-header">
-        <button type="button" id="btn-close-full" class="btn-icon btn-sonido">
+        <button type="button" id="btn-close-full" class="btn-icon btn-sonido" aria-label="Cerrar reproductor">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
         <span>Reproduciendo</span>
-        <button type="button" class="btn-icon btn-sonido" id="btn-heart-full">
+        <button type="button" class="btn-icon btn-sonido" id="btn-heart-full" aria-label="Favorito">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
         </button>
       </header>
@@ -125,17 +125,18 @@
         <div class="time-labels"><span id="time-current">0:00</span><span id="time-total">0:00</span></div>
       </div>
       <div class="full-controls">
-        <button type="button" id="btn-shuffle" class="btn-control btn-sonido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg></button>
-        <button type="button" id="btn-prev" class="btn-control btn-sonido"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
-        <button type="button" id="btn-play-main" class="btn-play-main btn-sonido">
+        <button type="button" id="btn-shuffle" class="btn-control btn-sonido" aria-label="Aleatorio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg></button>
+        <button type="button" id="btn-prev" class="btn-control btn-sonido" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+        <button type="button" id="btn-play-main" class="btn-play-main btn-sonido" aria-label="Reproducir/Pausar">
           <svg id="icon-play-main" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         </button>
-        <button type="button" id="btn-next" class="btn-control btn-sonido"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+        <button type="button" id="btn-next" class="btn-control btn-sonido" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
       </div>
     </div>
   </div>
 
-  <audio id="audio-player"></audio>
+  <!-- Añadido preload="none" para que no descargue el MP3 hasta que le den play -->
+  <audio id="audio-player" preload="none"></audio>
   
   <script type="module" src="sys_musica.js"></script>
 </body>
