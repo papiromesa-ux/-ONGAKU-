@@ -1,4 +1,8 @@
-// Ya no importamos arriba, usamos importación dinámica.
+// Ocultar la pantalla de carga INMEDIATAMENTE para que no sea el LCP
+const loadingScreen = document.getElementById('loading-screen');
+if(loadingScreen) {
+  setTimeout(() => { loadingScreen.classList.add('hidden'); }, 100);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   
@@ -14,15 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let misFavoritos = [];
 
   const audio = document.getElementById('audio-player');
-  const loadingScreen = document.getElementById('loading-screen');
 
-  // --- 1. OCULTAR PANTALLA DE CARGA INMEDIATAMENTE ---
-  // No esperamos a que cargue nada para quitar el "Cargando..." de la vista.
-  setTimeout(() => {
-    if(loadingScreen) loadingScreen.classList.add('hidden');
-  }, 800); // 0.8 segundos para que se vea bonito, pero no bloquea.
-
-  // --- 2. SONIDOS CLICK ---
+  // --- 1. SONIDOS CLICK ---
   const sonidos = [
     new Audio('resources/audio/click1.mp3'),
     new Audio('resources/audio/click2.mp3'),
@@ -35,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- 3. SALUDO ---
+  // --- 2. SALUDO ---
   function actualizarSaludo(genero = 'hombre') {
     const hora = new Date().getHours();
     const esFemenino = genero.toLowerCase() === 'mujer' || genero.toLowerCase() === 'femenino';
@@ -50,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   actualizarSaludo(); 
 
-  // --- 4. CARGAR CANCIONES (Prioridad Máxima) ---
+  // --- 3. CARGAR CANCIONES ---
   async function cargarMusicaDesdeGitHub() {
     try {
       const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${CARPETA_MUSICA}?ref=${GITHUB_BRANCH}&per_page=100`;
@@ -71,7 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if(canciones.length > 0) cargarCancion(0);
 
-      // Cargar los 3D en segundo plano
+      // Cargar los 3D y las imágenes en segundo plano
+      cargarImagenesSegundoPlano();
       cargarModelos3D();
 
     } catch (error) {
@@ -89,11 +87,15 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="song-artist">ONGAKU Lofi</div>
       </div>
     `;
+    const bgImg = document.querySelector('.song-cover');
+    if (bgImg && bgImg.style.backgroundImage) {
+       li.querySelector('.song-cover').style.backgroundImage = bgImg.style.backgroundImage;
+    }
     li.onclick = () => { cargarCancion(index); reproducir(); document.getElementById('full-player').classList.add('active'); };
     return li;
   }
 
-  // --- 5. REPRODUCTOR ---
+  // --- 4. REPRODUCTOR ---
   function cargarCancion(index) {
     if(!canciones[index]) return;
     currentTrackIndex = index;
@@ -133,7 +135,30 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('time-total').textContent = isNaN(audio.duration) ? "0:00" : `${Math.floor(audio.duration/60)}:${Math.floor(audio.duration%60).toString().padStart(2,'0')}`;
   };
 
-  // --- 6. FIREBASE (Carga Diferida) ---
+  // --- 5. CARGAR IMÁGENES EN SEGUNDO PLANO ---
+  function cargarImagenesSegundoPlano() {
+    const imgBanner = new Image();
+    imgBanner.src = 'img/japon2.jpg';
+    imgBanner.onload = () => {
+      document.querySelector('.ongaku-banner').style.backgroundImage = `linear-gradient(to bottom, rgba(2, 12, 27, 0.3), rgba(2, 12, 27, 0.9)), url('img/japon2.jpg')`;
+    };
+
+    const imgCover = new Image();
+    imgCover.src = 'img/japon1.jpg';
+    imgCover.onload = () => {
+      document.querySelectorAll('.song-cover, .mini-cover').forEach(el => {
+        el.style.backgroundImage = `url('img/japon1.jpg')`;
+      });
+    };
+
+    const imgFull = new Image();
+    imgFull.src = 'img/japon4.jpg';
+    imgFull.onload = () => {
+      document.getElementById('full-cover').style.backgroundImage = `url('img/japon4.jpg')`;
+    };
+  }
+
+  // --- 6. FIREBASE ---
   async function iniciarFirebase() {
     try {
       const { _db, _secAuth } = await import("./firebase.js");
@@ -155,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) { console.log("Firebase offline"); }
   }
 
-  // --- 7. MODELOS 3D (Carga ultra diferida) ---
+  // --- 7. MODELOS 3D ---
   async function cargarModelos3D() {
     try {
       const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
@@ -196,10 +221,10 @@ document.addEventListener('DOMContentLoaded', () => {
           (function animate() { requestAnimationFrame(animate); vrm.update(clock.getDelta()); vrm.scene.position.y = Math.sin(clock.elapsedTime) * 0.05; renderer.render(scene, camera); })();
         });
       }
-    } catch (error) { console.log("3D no cargados, pero app sí."); }
+    } catch (error) { console.log("3D no cargados"); }
   }
 
   // --- INICIAR ---
-  cargarMusicaDesdeGitHub(); // Lo primero
-  iniciarFirebase();         // En segundo plano
+  cargarMusicaDesdeGitHub(); 
+  iniciarFirebase();         
 });
