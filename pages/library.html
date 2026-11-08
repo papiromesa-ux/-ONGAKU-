@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ONGAKU - Biblioteca de música de MizushiKode.">
+  <title>ONGAKU - Biblioteca</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- Ruta relativa hacia atrás para salir de pages/ -->
+  <link rel="stylesheet" href="../ropero/index.css">
+  <link rel="stylesheet" href="../ropero/library.css">
+</head>
+<body>
+
+  <div class="bg-animated">
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+  </div>
+
+  <div id="app-container">
+    <header class="top-bar glass">
+      <div class="logo-container">
+        <div class="logo">BIBLIOTECA</div>
+        <div class="badge-mizushi">ONGAKU</div>
+      </div>
+      <div class="top-icons">
+        <a href="settings.html" class="btn-icon btn-sonido" aria-label="Ajustes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </a>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Contenedor donde JS inyectará los géneros -->
+      <div id="contenedor-generos"></div>
+    </main>
+
+    <!-- REPRODUCTOR GLOBAL (Se repite en todos los HTML) -->
+    <div id="mini-player" class="mini-player glass">
+      <div class="mini-cover" id="mini-cover"></div>
+      <div class="mini-info">
+        <div id="mini-title">Selecciona una canción</div>
+        <div id="mini-artist">ONGAKU Lofi</div>
+      </div>
+      <button type="button" id="mini-play" class="btn-play-mini btn-sonido" aria-label="Reproducir">
+        <svg id="mini-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="bottom-nav glass">
+      <a href="../index.html" class="nav-item btn-sonido" aria-label="Inicio">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </a>
+      <a href="library.html" class="nav-item active btn-sonido" aria-label="Biblioteca">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2.19 12.19L6 18l3.81-8.19L18 6l-3.81 8.19z"/></svg>
+      </a>
+      <a href="favorites.html" class="nav-item btn-sonido" aria-label="Favoritos">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </a>
+      <a href="search.html" class="nav-item btn-sonido" aria-label="Buscar">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      </a>
+    </nav>
+  </div>
+
+  <audio id="audio-player" preload="none"></audio>
+  
+  <script src="../cerebros/player.js"></script>
+  <script src="../cerebros/library.js"></script>
+</body>
+</html>
