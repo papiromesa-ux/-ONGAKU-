@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONGAKU - Ajustes</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../ropero/index.css">
+  <link rel="stylesheet" href="../ropero/settings.css">
+</head>
+<body>
+
+  <div class="bg-animated">
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+  </div>
+
+  <div id="app-container">
+    <header class="top-bar glass">
+      <div class="logo-container">
+        <div class="logo">AJUSTES</div>
+        <div class="badge-mizushi">ONGAKU</div>
+      </div>
+      <div class="top-icons">
+        <a href="../index.html" class="btn-icon btn-sonido" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </a>
+      </div>
+    </header>
+
+    <main class="main-content">
+      
+      <div class="settings-group-title">CUENTA</div>
+      <div class="settings-box glass">
+        <div class="settings-item">
+          <span>Administración de cuenta</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      </div>
+
+      <div class="settings-group-title">PREFERENCIAS</div>
+      <div class="settings-box glass">
+        <div class="settings-item">
+          <span>Calidad de Audio</span>
+          <span style="color: var(--aguamarina); font-family: 'Inter'; font-size: 0.9rem;">Alta (320kbps)</span>
+        </div>
+        <div class="settings-item">
+          <span>Modo sin conexión</span>
+          <div class="toggle active"></div>
+        </div>
+      </div>
+
+      <div class="settings-group-title">MIZUSHIKODE</div>
+      <div class="settings-box glass">
+        <a href="https://papiromesa-ux.github.io/-MIZUSHIKODE-/" class="settings-item btn-sonido" style="text-decoration: none; color: var(--tornasol-1);">
+          <span>Volver a la Academia</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </a>
+      </div>
+
+    </main>
+
+    <div id="mini-player" class="mini-player glass">
+      <div class="mini-cover" id="mini-cover"></div>
+      <div class="mini-info">
+        <div id="mini-title">Selecciona una canción</div>
+        <div id="mini-artist">ONGAKU Lofi</div>
+      </div>
+      <button type="button" id="mini-play" class="btn-play-mini btn-sonido" aria-label="Reproducir">
+        <svg id="mini-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+
+    <!-- Ajustes no tiene nav inferior, solo el botón de cerrar arriba -->
+  </div>
+
+  <audio id="audio-player" preload="none"></audio>
+  <script src="../cerebros/player.js"></script>
+</body>
+</html>
