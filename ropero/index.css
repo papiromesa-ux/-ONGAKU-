@@ -111,7 +111,7 @@ button:active svg, a:active svg { transform: scale(0.85); color: var(--aguamarin
   display: flex;
   flex-direction: column;
   padding: 0 1.5rem;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .cover-wrapper {
