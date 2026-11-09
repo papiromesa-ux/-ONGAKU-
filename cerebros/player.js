@@ -2,7 +2,7 @@ import { _db, _secAuth } from "../firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
-// Inyectar el HTML del reproductor
+// 1. Inyectar el HTML completo
 document.body.insertAdjacentHTML('beforeend', `
   <div id="full-player" class="full-player">
     <header class="full-header glass">
@@ -10,11 +10,11 @@ document.body.insertAdjacentHTML('beforeend', `
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
       <span class="header-title">REPRODUCIENDO</span>
-      <button type="button" id="btn-queue" class="btn-icon" aria-label="Cola">
+      <button type="button" class="btn-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
       </button>
     </header>
-    <div class="player-main" id="player-main">
+    <div class="player-main">
       <div class="cover-wrapper">
         <div class="pulse-ring"></div>
         <div class="full-cover" id="full-cover"></div>
@@ -42,162 +42,153 @@ document.body.insertAdjacentHTML('beforeend', `
         <button type="button" id="btn-timer" class="btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></button>
       </div>
     </div>
-    <div class="queue-panel" id="queue-panel">
-      <div class="queue-header">
-        <h3>COLA DE REPRODUCCIÓN</h3>
-        <button type="button" id="btn-close-queue" class="btn-icon">X</button>
-      </div>
-      <ul id="queue-list" class="song-list"></ul>
-    </div>
   </div>
 `);
 
-document.addEventListener('DOMContentLoaded', () => {
-  const audio = document.getElementById('audio-player');
-  const fullPlayer = document.getElementById('full-player');
-  const miniPlayer = document.getElementById('mini-player');
-  
-  // Elementos UI
-  const fullTitle = document.getElementById('full-title');
-  const miniTitle = document.getElementById('mini-title');
-  const coverFull = document.getElementById('full-cover');
-  const coverMini = document.getElementById('mini-cover');
-  const btnPlayFull = document.getElementById('btn-play-full');
-  const btnPlayMini = document.getElementById('mini-play');
-  const iconPlayFull = document.getElementById('icon-play-full');
-  const iconMiniPlay = document.getElementById('mini-icon-play');
-  const progressFill = document.getElementById('progress-fill');
-  const timeCurrent = document.getElementById('time-current');
-  const timeTotal = document.getElementById('time-total');
-  const btnHeart = document.getElementById('btn-heart');
-  
-  let isPlaying = false;
-  let usuarioActual = null;
-  let misFavoritos = [];
+// 2. Selección de elementos (Ahora sí, después de inyectar el HTML)
+const audio = document.getElementById('audio-player');
+const fullPlayer = document.getElementById('full-player');
+const miniPlayer = document.getElementById('mini-player');
+const btnCloseFull = document.getElementById('btn-close-full');
+const btnPlayFull = document.getElementById('btn-play-full');
+const btnPlayMini = document.getElementById('mini-play');
+const iconPlayFull = document.getElementById('icon-play-full');
+const iconMiniPlay = document.getElementById('mini-icon-play');
+const fullTitle = document.getElementById('full-title');
+const miniTitle = document.getElementById('mini-title');
+const coverFull = document.getElementById('full-cover');
+const coverMini = document.getElementById('mini-cover');
+const progressFill = document.getElementById('progress-fill');
+const timeCurrent = document.getElementById('time-current');
+const timeTotal = document.getElementById('time-total');
+const btnHeart = document.getElementById('btn-heart');
 
-  // --- FIREBASE AUTH (Boda) ---
-  onAuthStateChanged(_secAuth, async (user) => {
-    if (user) {
-      usuarioActual = user;
-      const docRef = doc(_db, "estudiantes", user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        misFavoritos = docSnap.data().favoritos || [];
-        actualizarCorazonUI();
-      }
-    }
-  });
+let isPlaying = false;
+let usuarioActual = null;
+let misFavoritos = [];
 
-  // --- FUNCIÓN PARA ACTUALIZAR LA UI ---
-  function actualizarInterfazCancion(titulo, src, cover = "url('img/japon1.jpg')") {
-    if(fullTitle) fullTitle.textContent = titulo;
-    if(miniTitle) miniTitle.textContent = titulo;
-    if(coverFull) coverFull.style.backgroundImage = cover;
-    if(coverMini) coverMini.style.backgroundImage = cover;
-    
+// 3. Funciones base
+function setPlayIcons(playing) {
+  const path = playing ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
+  if(iconPlayFull) iconPlayFull.innerHTML = path;
+  if(iconMiniPlay) iconMiniPlay.innerHTML = path;
+}
+
+function reproducir() {
+  if (!audio.src) return;
+  audio.play().then(() => { isPlaying = true; setPlayIcons(true); }).catch(e => console.log("Tap requerido"));
+}
+
+function pausar() {
+  audio.pause();
+  isPlaying = false;
+  setPlayIcons(false);
+}
+
+function togglePlay() { isPlaying ? pausar() : reproducir(); }
+
+// 4. Actualizar Interfaz (El arreglo del título)
+function actualizarUI(titulo, src) {
+  if(fullTitle) fullTitle.textContent = titulo;
+  if(miniTitle) miniTitle.textContent = titulo;
+  
+  // Usamos una URL absoluta para la imagen para evitar problemas de rutas
+  const rutaImg = "https://papiromesa-ux.github.io/-ONGAKU-/img/japon1.jpg";
+  if(coverFull) coverFull.style.backgroundImage = `url('${rutaImg}')`;
+  if(coverMini) coverMini.style.backgroundImage = `url('${rutaImg}')`;
+  
+  if (audio.src !== src) {
     audio.src = src;
     localStorage.setItem('ongaku_title', titulo);
     localStorage.setItem('ongaku_src', src);
-    
-    // Configurar MediaSession (Para que no se corte al minimizar)
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: titulo, artist: 'ONGAKU Lofi', album: 'MizushiKode',
-        artwork: [{ src: 'https://papiromesa-ux.github.io/-MIZUSHIKODE-/assets/img/icon-musica-512.png', sizes: '512x512', type: 'image/png' }]
-      });
-    }
-    actualizarCorazonUI();
   }
-
-  // ESCUCHAR EL EVENTO DE LAS LISTAS (library, search, index)
-  document.addEventListener('play-song', (e) => {
-    const { titulo, src } = e.detail;
-    actualizarInterfazCancion(titulo, src);
-    reproducir();
-    fullPlayer.classList.add('active');
-  });
-
-  // --- CONTROLES DE REPRODUCCIÓN ---
-  function reproducir() {
-    if (!audio.src) return;
-    audio.play().then(() => {
-      isPlaying = true;
-      if(iconPlayFull) iconPlayFull.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-      if(iconMiniPlay) iconMiniPlay.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-    }).catch(e => console.log("Tap requerido"));
-  }
-
-  function pausar() {
-    audio.pause();
-    isPlaying = false;
-    if(iconPlayFull) iconPlayFull.innerHTML = '<path d="M8 5v14l11-7z"/>';
-    if(iconMiniPlay) iconMiniPlay.innerHTML = '<path d="M8 5v14l11-7z"/>';
-  }
-
-  function togglePlay() { isPlaying ? pausar() : reproducir(); }
-
-  if(btnPlayFull) btnPlayFull.onclick = togglePlay;
-  if(btnPlayMini) btnPlayMini.onclick = togglePlay;
-
-  // --- EVENTOS DE AUDIO ---
-  audio.ontimeupdate = () => {
-    const pct = (audio.currentTime / audio.duration) * 100;
-    if(progressFill) progressFill.style.width = `${pct || 0}%`;
-    if(timeCurrent) timeCurrent.textContent = isNaN(audio.currentTime) ? "0:00" : `${Math.floor(audio.currentTime/60)}:${Math.floor(audio.currentTime%60).toString().padStart(2,'0')}`;
-  };
   
-  audio.onloadedmetadata = () => {
-    if(timeTotal) timeTotal.textContent = isNaN(audio.duration) ? "0:00" : `${Math.floor(audio.duration/60)}:${Math.floor(audio.duration%60).toString().padStart(2,'0')}`;
-  };
-
-  // --- CORAZÓN (FAVORITOS) ---
-  function actualizarCorazonUI() {
-    if (!fullTitle || !btnHeart) return;
-    if (misFavoritos.includes(fullTitle.textContent)) {
-      btnHeart.classList.add('liked');
-    } else {
-      btnHeart.classList.remove('liked');
-    }
-  }
-
-  if(btnHeart) {
-    btnHeart.onclick = async () => {
-      if (!usuarioActual || fullTitle.textContent === "Selecciona una canción") return;
-      const t = fullTitle.textContent;
-      const docRef = doc(_db, "estudiantes", usuarioActual.uid);
-
-      if (misFavoritos.includes(t)) {
-        await updateDoc(docRef, { favoritos: arrayRemove(t) });
-        misFavoritos = misFavoritos.filter(c => c !== t);
-      } else {
-        await updateDoc(docRef, { favoritos: arrayUnion(t) });
-        misFavoritos.push(t);
-      }
-      actualizarCorazonUI();
-    };
-  }
-
-  // --- ABRIR / CERRAR ---
-  if (miniPlayer) {
-    miniPlayer.addEventListener('click', (e) => {
-      if (!e.target.closest('button')) fullPlayer.classList.add('active');
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: titulo, artist: 'ONGAKU Lofi', album: 'MizushiKode',
+      artwork: [{ src: 'https://papiromesa-ux.github.io/-MIZUSHIKODE-/assets/img/icon-musica-512.png', sizes: '512x512', type: 'image/png' }]
     });
   }
-  document.getElementById('btn-close-full').onclick = () => fullPlayer.classList.remove('active');
+  actualizarCorazonUI(titulo);
+}
 
-  // --- RECUPERAR ESTADO AL ENTRAR A UNA NUEVA PÁGINA ---
-  const savedSrc = localStorage.getItem('ongaku_src');
-  const savedTitle = localStorage.getItem('ongaku_title');
-  const savedTime = localStorage.getItem('ongaku_time');
+// 5. Escuchar el evento de las listas (library.js y search.js)
+document.addEventListener('play-song', (e) => {
+  const { titulo, src } = e.detail;
+  actualizarUI(titulo, src);
+  reproducir();
+  if(fullPlayer) fullPlayer.classList.add('active');
+});
 
-  if (savedSrc) {
-    actualizarInterfazCancion(savedTitle, savedSrc);
-    audio.currentTime = parseFloat(savedTime) || 0;
-    
-    // El navegador bloquea el autoplay al cambiar de página. 
-    // Ponemos el botón en "Play" para que el usuario solo toque una vez.
-    isPlaying = false;
-    if(iconPlayFull) iconPlayFull.innerHTML = '<path d="M8 5v14l11-7z"/>';
-    if(iconMiniPlay) iconMiniPlay.innerHTML = '<path d="M8 5v14l11-7z"/>';
+// 6. Eventos de los botones (Asignados con onclick para que funcionen seguro)
+if(btnCloseFull) btnCloseFull.onclick = () => fullPlayer.classList.remove('active');
+if(btnPlayFull) btnPlayFull.onclick = togglePlay;
+if(btnPlayMini) btnPlayMini.onclick = togglePlay;
+if(miniPlayer) miniPlayer.onclick = (e) => { if (!e.target.closest('button')) fullPlayer.classList.add('active'); };
+
+// Progreso del audio
+audio.ontimeupdate = () => {
+  const pct = (audio.currentTime / audio.duration) * 100;
+  if(progressFill) progressFill.style.width = `${pct || 0}%`;
+  if(timeCurrent) timeCurrent.textContent = isNaN(audio.currentTime) ? "0:00" : `${Math.floor(audio.currentTime/60)}:${Math.floor(audio.currentTime%60).toString().padStart(2,'0')}`;
+};
+audio.onloadedmetadata = () => {
+  if(timeTotal) timeTotal.textContent = isNaN(audio.duration) ? "0:00" : `${Math.floor(audio.duration/60)}:${Math.floor(audio.duration%60).toString().padStart(2,'0')}`;
+};
+
+// 7. Firebase Auth
+onAuthStateChanged(_secAuth, async (user) => {
+  if (user) {
+    usuarioActual = user;
+    const docRef = doc(_db, "estudiantes", user.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      misFavoritos = docSnap.data().favoritos || [];
+      actualizarCorazonUI(fullTitle ? fullTitle.textContent : "");
+    }
+  }
+});
+
+// 8. Lógica del Corazón
+function actualizarCorazonUI(titulo) {
+  if (!btnHeart || !titulo) return;
+  if (misFavoritos.includes(titulo)) btnHeart.classList.add('liked');
+  else btnHeart.classList.remove('liked');
+}
+
+if(btnHeart) {
+  btnHeart.onclick = async () => {
+    if (!usuarioActual || !fullTitle || fullTitle.textContent === "Selecciona una canción") return;
+    const t = fullTitle.textContent;
+    const docRef = doc(_db, "estudiantes", usuarioActual.uid);
+
+    if (misFavoritos.includes(t)) {
+      await updateDoc(docRef, { favoritos: arrayRemove(t) });
+      misFavoritos = misFavoritos.filter(c => c !== t);
+    } else {
+      await updateDoc(docRef, { favoritos: arrayUnion(t) });
+      misFavoritos.push(t);
+    }
+    actualizarCorazonUI(t);
+  };
+}
+
+// 9. Recuperar estado al cambiar de página
+const savedSrc = localStorage.getItem('ongaku_src');
+const savedTitle = localStorage.getItem('ongaku_title');
+const savedTime = localStorage.getItem('ongaku_time');
+
+if (savedSrc && savedTitle) {
+  actualizarUI(savedTitle, savedSrc);
+  audio.currentTime = parseFloat(savedTime) || 0;
+  isPlaying = false;
+  setPlayIcons(false);
+}
+
+// Guardar progreso al salir
+window.addEventListener('beforeunload', () => {
+  if (audio && audio.src) {
+    localStorage.setItem('ongaku_time', audio.currentTime);
+    localStorage.setItem('ongaku_isPlaying', isPlaying);
   }
 });
