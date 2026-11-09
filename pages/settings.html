@@ -30,24 +30,34 @@
     </header>
 
     <main class="main-content">
-      
+      <!-- Mensaje temporal para feedback -->
+      <div id="toast-msg" class="toast-msg"></div>
+
       <div class="settings-group-title">CUENTA</div>
       <div class="settings-box glass">
-        <div class="settings-item">
-          <span>Administración de cuenta</span>
+        <a href="https://papiromesa-ux.github.io/-MIZUSHIKODE-/pages/perfil.html" class="settings-item btn-sonido" style="text-decoration: none; color: inherit;">
+          <span>Ir a mi perfil de MizushiKode</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </div>
+        </a>
       </div>
 
       <div class="settings-group-title">PREFERENCIAS</div>
       <div class="settings-box glass">
-        <div class="settings-item">
+        <div class="settings-item" id="btn-calidad">
           <span>Calidad de Audio</span>
-          <span style="color: var(--aguamarina); font-family: 'Inter'; font-size: 0.9rem;">Alta (320kbps)</span>
+          <span id="txt-calidad" style="color: var(--aguamarina); font-family: 'Inter'; font-size: 0.9rem;">Alta (320kbps)</span>
         </div>
-        <div class="settings-item">
+        <div class="settings-item" id="btn-offline">
           <span>Modo sin conexión</span>
-          <div class="toggle active"></div>
+          <div class="toggle active" id="toggle-offline"></div>
+        </div>
+      </div>
+
+      <div class="settings-group-title">ALMACENAMIENTO</div>
+      <div class="settings-box glass">
+        <div class="settings-item" id="btn-cache">
+          <span>Borrar Caché de la App</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--tornasol-1);"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </div>
       </div>
 
@@ -71,11 +81,10 @@
         <svg id="mini-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       </button>
     </div>
-
-    <!-- Ajustes no tiene nav inferior, solo el botón de cerrar arriba -->
   </div>
 
   <audio id="audio-player" preload="none"></audio>
-  <script src="../cerebros/player.js"></script>
+  <script type="module" src="../cerebros/player.js"></script>
+  <script type="module" src="../cerebros/settings.js"></script>
 </body>
 </html>
