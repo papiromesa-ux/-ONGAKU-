@@ -1,20 +1,11 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Saludo
-  function actualizarSaludo(genero = 'hombre') {
-    const hora = new Date().getHours();
-    const esFemenino = genero.toLowerCase() === 'mujer' || genero.toLowerCase() === 'femenino';
-    let saludo = "";
-    if (hora >= 1 && hora < 7) saludo = esFemenino ? "HOLA, MADRUGADORA" : "HOLA, MADRUGADOR";
-    else if (hora >= 7 && hora < 13) saludo = "BUENOS DÍAS";
-    else if (hora >= 13 && hora < 19) saludo = "BUEN PROVECHO";
-    else if (hora >= 19 && hora < 22) saludo = "BUENAS NOCHES";
-    else saludo = esFemenino ? "HOLA, NOCTÁMBURA" : "HOLA, NOCTÁMBULO";
-    const el = document.getElementById('dynamic-greeting');
-    if(el) el.textContent = saludo;
-  }
-  actualizarSaludo();
+// cerebros/index.js
+import { iniciarBoda } from "./auth.js";
 
-  // 2. Cargar Tendencias (Solo 5 canciones)
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Iniciar la boda (Verificar si está logueado)
+  iniciarBoda();
+
+  // 2. Cargar Tendencias
   async function cargarTendencias() {
     try {
       const url = `https://api.github.com/repos/papiromesa-ux/-ONGAKU-/contents/musicas/fondo?ref=main&per_page=100`;
@@ -24,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const canciones = archivos.filter(a => a.name.endsWith('.mp3')).map(a => ({
         titulo: a.name.replace('.mp3', '').replace(/_/g, ' ').toUpperCase(),
         src: a.download_url
-      })).slice(0, 5); // Solo mostramos las 5 primeras
+      })).slice(0, 5);
 
       const lista = document.getElementById('lista-tendencias');
       lista.innerHTML = '';
@@ -40,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         `;
         li.onclick = () => {
-          // Actualizamos el reproductor global
           const audio = document.getElementById('audio-player');
           audio.src = cancion.src;
           document.getElementById('mini-title').textContent = cancion.titulo;
