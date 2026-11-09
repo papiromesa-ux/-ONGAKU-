@@ -61,3 +61,11 @@
 .toggle.active::after {
   left: 24px;
 }
+
+.toast-msg {
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px);
+  background: var(--aguamarina); color: #000; padding: 10px 20px; border-radius: 20px;
+  font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem;
+  opacity: 0; transition: 0.3s; z-index: 10000; pointer-events: none;
+}
+.toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
