@@ -1,0 +1,28 @@
+/* Estilos exclusivos de la página de favoritos */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4rem;
+  text-align: center;
+  color: var(--texto-dim);
+}
+
+.empty-state svg {
+  width: 80px;
+  height: 80px;
+  color: rgba(255, 46, 151, 0.3);
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state .sub {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+}
