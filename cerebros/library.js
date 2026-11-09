@@ -87,13 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
       li.onclick = () => {
-        audio.src = cancion.src;
-        miniTitle.textContent = cancion.titulo;
-        miniCover.style.backgroundImage = "url('../img/japon1.jpg')";
-        audio.play();
-        localStorage.setItem('ongaku_isPlaying', 'true');
-        document.getElementById('mini-icon-play').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-      };
+  // Enviamos la orden al reproductor global en lugar de tocar el audio directo
+  document.dispatchEvent(new CustomEvent('play-song', { 
+    detail: { titulo: cancion.titulo, src: cancion.src } 
+  }));
+};
       ul.appendChild(li);
     });
 
